@@ -1,34 +1,56 @@
 import './App.css';
 import {FaBeer} from 'react-icons/fa'
-import { Login } from './views/user/Login';
-import { Register } from './views/user/Register';
+import { Login } from './views/pages/user/Login';
+import { Register } from './views/pages/user/Register';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HomePage } from './views/pages/main/HomePage';
+import { ErrorPage } from './views/pages/main/ErrorPage';
+import { useEffect, useState } from 'react';
+import { GuestNavbarComponent } from './views/components/GuestNavbarComponent';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './util/FireBaseConfig';
+import { AuthNavbarComponent } from './views/components/AuthNavbarComponent';
+
 
 function App() {
+  const [userSession, setUserSession] = useState({})
+
+  onAuthStateChanged(auth, (currentUser) => {
+    setUserSession(currentUser);
+  })
+
+  // useEffect(() => {
+  //   setIsAuth(checkAuth())
+  // }, [checkAuth()])
+  
+
   return (
-    <div className="App">
-      {/* Navbar */}
-      <nav class="navbar navbar-expand-lg bg-light">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">CHello</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+    <BrowserRouter>
+      <nav className="navbar navbar-expand-lg bg-light">
+        <div className="container-fluid">
+          <a className="navbar-brand" href="/">CHello</a>
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
           </button>
-          <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-            <div class="navbar-nav">
-              <a class="nav-link" aria-current="page" href="#">Workspace</a>
-              <a class="nav-link" href="#">Account</a>
+          <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div className="navbar-nav">
+                {userSession==null && <GuestNavbarComponent />}
+                {userSession!=null && <AuthNavbarComponent email={userSession.email} />}
             </div>
           </div>
         </div>
       </nav>
+      <Routes>
+        <Route path='/' element={<HomePage/>} />
+        <Route path='/login' element={<Login/>} />
+        <Route path='/register' element={<Register/>} />
 
-      {/* Content */}
-      <div>
-        <Register/>
-        <Login/>
-      </div>
+        <Route path='*' element={<ErrorPage/>}/>
+      </Routes>
+    </BrowserRouter>
+    // <div className="App">
       
-    </div>
+
   );
 }
 
