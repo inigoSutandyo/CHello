@@ -1,15 +1,16 @@
 import './App.css';
-import {FaBeer} from 'react-icons/fa'
 import { Login } from './views/pages/user/Login';
 import { Register } from './views/pages/user/Register';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { HomePage } from './views/pages/main/HomePage';
 import { ErrorPage } from './views/pages/main/ErrorPage';
 import { useEffect, useState } from 'react';
 import { GuestNavbarComponent } from './views/components/GuestNavbarComponent';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './util/FireBaseConfig';
 import { AuthNavbarComponent } from './views/components/AuthNavbarComponent';
+import { WorkspacePage } from './views/pages/main/WorkspacePage';
+import { GuestPage } from './views/pages/main/GuestPage';
+import { BoardPage } from './views/pages/main/BoardPage';
 
 
 function App() {
@@ -41,7 +42,9 @@ function App() {
         </div>
       </nav>
       <Routes>
-        <Route path='/' element={<HomePage/>} />
+        <Route path='/' element={<GuestPage/>} />
+        <Route path='/workspace' element={userSession!=null && <WorkspacePage userId={'8GUZ2Um6WvTPw7wJqYntnObTemI2'}/>} />
+        <Route path='/workspace/:workspaceId' element={<BoardPage userId={'8GUZ2Um6WvTPw7wJqYntnObTemI2'}/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />
 

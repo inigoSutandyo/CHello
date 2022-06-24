@@ -10,7 +10,7 @@ export const Login = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    setIsError(errorMsg == "" ? false : true)
+    setIsError(errorMsg === "" ? false : true)
   }, [errorMsg])
 
   return (
@@ -29,7 +29,7 @@ export const Login = () => {
               let email = document.getElementById('email').value
               let password = document.getElementById('password').value
               loginAuth(email, password).then((data) => {
-                if (data != "") {
+                if (data !== "") {
                   setErrorMsg(data)
                 } else {
                   navigate('/')
