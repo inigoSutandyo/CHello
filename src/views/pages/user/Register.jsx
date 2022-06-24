@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import {registerAuth} from '../../../controller/UserController'
 import { useNavigate } from "react-router-dom";
 import { ErrorComponent } from '../../components/ErrorComponent';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 export const Register = () => {
 
@@ -51,13 +52,7 @@ export const Register = () => {
                     {isError && <ErrorComponent msg={errorMsg}/>}
                 </div>
             ) : 
-            <div>
-                <div className="spinner">
-                    <div className="bounce1"></div>
-                    <div className="bounce2"></div>
-                    <div className="bounce3"></div>
-                </div>
-            </div>
+            <LoadingComponent/>
         }
     </>
   )

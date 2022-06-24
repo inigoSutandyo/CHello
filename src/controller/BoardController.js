@@ -5,56 +5,42 @@ import { db } from "../util/FireBaseConfig"
 export const useBoards = (userId, workspaceId) => {
     const [boards, setBoards] = useState(null)
     
-    // TODO: can be change for better performance
-
-    const getWorkspace = async () => {
-        const workspaceRef = doc(db,'workspaces',workspaceId)
-        const workspaceSnapshot = await getDoc(workspaceRef)
-        
-        // console.log("ID = " + workspaceId)
-        if (workspaceSnapshot.exists()) {
-            const refBoards = []
-            workspaceSnapshot.data().boards.forEach(element => {
-                refBoards.push(element.id)
-            });
-            return refBoards
-        } else {
-            return null
-        }
-    }
-    
-    // console.log(userId)
     useEffect(() => {
-        getWorkspace().then((refBoards) => {
-            if (refBoards == null) {
-                return
-            }
-            const docRef = doc(db, 'users', userId)
-            const documents = []
-            const q = query(collection(db, "boards"), where('admins', "array-contains", docRef), where('uid', 'in', refBoards))
-            const loadQuery = async () => {
-                try {
-                    const querySnapshot = await getDocs(q)
-                    // console.log(querySnapshot)
-                    if (querySnapshot) {
-                        
-                        querySnapshot.forEach(element => {
-                            // console.log(querySnapshot)
-                            documents.push({
-                                ...element.data()
-                            })
-                        });   
-                    }
-                    
-                } catch (e) {
-                    console.log(e)
+        if (userId == null || workspaceId == null) {
+            return
+        }
+        const loadQuery = async () => {
+            
+            try {
+                const workspaceRef = doc(db, 'workspaces', workspaceId)
+                const workspaceSnap = await getDoc(workspaceRef)
+                const boardRef = []
+                if (workspaceSnap.exists()) {
+                    workspaceSnap.data().boards.forEach(doc => {
+                        boardRef.push(doc.id)
+                    });
                 }
+                const docRef = doc(db,'users',userId)
+                const q = query(collection(db, "boards"), where('admins', "array-contains", docRef), where('uid','in',boardRef))
+                const querySnapshot = await getDocs(q)
+
+                if (querySnapshot) {
+                    const documents = []
+                    querySnapshot.forEach(element => {
+                        console.log(querySnapshot)
+                        documents.push({
+                            ...element.data()
+                        })
+                    });
+    
+                    setBoards(documents)
+                }
+                
+            } catch (e) {
+                console.log(e)
             }
-            loadQuery()
-            console.log(documents)
-            setBoards(documents)      
-        })
+        }
+        loadQuery()
     }, [userId])
-    console.log(boards)
     return boards;
 }

@@ -23,7 +23,6 @@ function App() {
   // useEffect(() => {
   //   setIsAuth(checkAuth())
   // }, [checkAuth()])
-  
 
   return (
     <BrowserRouter>
@@ -43,8 +42,8 @@ function App() {
       </nav>
       <Routes>
         <Route path='/' element={<GuestPage/>} />
-        <Route path='/workspace' element={userSession!=null && <WorkspacePage userId={'8GUZ2Um6WvTPw7wJqYntnObTemI2'}/>} />
-        <Route path='/workspace/:workspaceId' element={<BoardPage userId={'8GUZ2Um6WvTPw7wJqYntnObTemI2'}/>} />
+        <Route path='/workspace' element={userSession!=null && <WorkspacePage userId={userSession.uid}/>} />
+        <Route path='/workspace/:workspaceId' element={userSession!=null && <BoardPage userId={userSession.uid}/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />
 

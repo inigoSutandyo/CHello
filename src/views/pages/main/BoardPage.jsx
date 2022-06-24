@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useBoards } from '../../../controller/BoardController'
 import { useWorkspaceById } from '../../../controller/WorkspaceController'
 import { BoardListComponent } from '../../components/BoardListComponent'
+import { LoadingComponent } from '../../components/LoadingComponent'
 
 export const BoardPage = ({userId}) => {
   const {workspaceId} = useParams()
@@ -12,22 +13,20 @@ export const BoardPage = ({userId}) => {
   }, [userId])
 
   const boards = useBoards(sessionUser, workspaceId)
-
+  const workspace = useWorkspaceById(workspaceId)
   return (
     <>
-      {boards != null  ? (
-        <div className='m-3'>
-            {/* <h3>{workspace.name}</h3> */}
-            <h4>Boards</h4>
+      {boards != null && workspace != null && sessionUser!=null ? (
+        <div className='m-3'> 
+            <div className='fs-3'>
+              <p color='text-primary'>{workspace.name}</p> 
+              Boards
+            </div>
             <BoardListComponent boards={boards}/>
         </div>
         
       ) : (
-        <div className="spinner">
-          <div className="bounce1"></div>
-          <div className="bounce2"></div>
-          <div className="bounce3"></div>
-        </div>
+        <LoadingComponent/>
       )}
       
     </>

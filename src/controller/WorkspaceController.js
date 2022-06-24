@@ -4,8 +4,12 @@ import { db } from "../util/FireBaseConfig"
 
 export const useWorkspace = (userId) => {
     const [workspace, setWorkspace] = useState(null)
-    // console.log(userId)
+    
     useEffect(() => {
+        if (userId == null) {
+            
+            return
+        }
         const docRef = doc(db,'users',userId)
         const q = query(collection(db, "workspaces"), where('admins', "array-contains", docRef))
         const loadQuery = async () => {
@@ -30,6 +34,7 @@ export const useWorkspace = (userId) => {
         }
         loadQuery()
     }, [userId])
+
     return workspace;
 }
 
@@ -39,14 +44,12 @@ export const useWorkspaceById = (workspaceId) => {
     
     useEffect(() => {
         const loadAsync = async () => {
-            const docRef = doc(db, 'users', workspaceId)
-            const docSnap = await getDoc(docRef).then((doc) => {
-                if (doc == null) {
-                    return
-                }
-
-                setWorkspace(doc);
-            })
+            const docRef = doc(db, 'workspaces', workspaceId)
+            const docSnap = await getDoc(docRef)
+            
+            if (docSnap.exists()) {
+                setWorkspace(docSnap.data())
+            }
         }
         loadAsync()
     }, [workspaceId]);

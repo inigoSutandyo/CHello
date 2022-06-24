@@ -7,7 +7,7 @@ export const AuthNavbarComponent = (props) => {
 
   return (
     <>
-      <a className="nav-link" href="/register">Hello, {props.email}</a>
+      <a className="nav-link" href="/">Hello, {props.email}</a>
         <a className="nav-link active" aria-current="page" href="/workspace">Workspace</a>
         <a className="nav-link" href='/login' onClick={() => {
           logoutAuth()

@@ -3,32 +3,25 @@ import { useState } from 'react'
 import { useBoards } from '../../../controller/BoardController'
 import { useWorkspace } from '../../../controller/WorkspaceController'
 import { BoardListComponent } from '../../components/BoardListComponent'
+import { LoadingComponent } from '../../components/LoadingComponent'
 import { WorkspaceListComponent } from '../../components/WorkspaceListComponent'
 
 export const WorkspacePage = ({userId}) => { 
   
-  const [sessionUser, setSessionUser] = useState(userId)
-  // console.log(userId)
+  const [sessionUser, setSessionUser] = useState(null)
+
   useEffect(() => {
     setSessionUser(userId)
   }, [userId])
   
   const workspaces = useWorkspace(sessionUser)
-  // if (sessionUser != null) {
-    
-  // }
 
   return (
     <>
-      {workspaces == null ? (
-        <div className="spinner">
-            <div className="bounce1"></div>
-            <div className="bounce2"></div>
-            <div className="bounce3"></div>
-        </div>
+      {workspaces == null || sessionUser == null ? (
+        <LoadingComponent/>
       ) : <div className='m-3'>
             <h3>Workspace</h3>
-            {/* <BoardListComponent boards={boards}/> */}
             <WorkspaceListComponent workspaces={workspaces}/>
         </div>}
     </>
