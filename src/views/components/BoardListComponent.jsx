@@ -1,11 +1,13 @@
 import { VscAdd } from "react-icons/vsc";
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom' 
+import {FaTrashAlt} from 'react-icons/fa'
+import { LoadingComponent } from "./LoadingComponent";
 
-export const BoardListComponent = ({boards}) => {
+
+export const BoardListComponent = ({boards, sessionUser, workSpaceId, addNewBoard, deleteBoard}) => {
 //   const [idToBeDeleted, setIdToBeDeleted] = useState(null)
 //   console.log(boards + " " + typeof(boards))
-
   return (
     <>
         <div className='mx-2 mt-5 d-flex flex-wrap'>
@@ -14,31 +16,41 @@ export const BoardListComponent = ({boards}) => {
                     No Boards created yet. Why don't you go ahead and create one?
                 </h1> : (
                     boards.map(b=>
-                        <div className="card" key={b} style={{maxWidth: "20%"}}>
+                        <div className="card me-5 mb-3 text-bg-dark p-3" key={b.uid} style={{width: "20%"}}>
                             <div className="card-body d-flex flex-column">
                                 <h4 className="card-title mb-3 text-wrap">{b.title}</h4>
                                 {/* <p className="card-text">Date Created : {b.date}</p> */}
-                                <Link to={`/workspace/${b.uid}`}>
-                                    <p className="btn btn-primary">
-                                        Open Board
-                                    </p>
-                                </Link>
-                                
+                                <div className="d-flex flex-row justify-content-between">
+                                    <Link to={`/board/${b.uid}`}>
+                                        <p className="btn btn-primary">
+                                            Open
+                                        </p>
+                                    </Link>
+                                    <a className="btn text-danger fs-4" onClick={ () => {
+                                        deleteBoard(b.uid, workSpaceId)
+                                    }}>
+                                        <FaTrashAlt/>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     )
                 )}
         </div>
-        <div className="row g-2 mx-2 mt-5 p-1">
+        <form className="row g-2 mx-2 mt-5 p-1" onSubmit={(e)=> {
+                addNewBoard(e)
+            }}>
+            <input type="hidden" name="workSpaceId" id="workSpaceId" value={workSpaceId}/>
+            <input type="hidden" name="userId" id="userId" value={sessionUser}/>
             <div className="col-auto">
-                <input type="text" className="form-control" id="newboard" placeholder="New Workspace"/>
+                <input required type="text" className="form-control" name="boardTitle" id="boardTitle" placeholder="Add Board"/>
             </div>
             <div className="col-auto">
                 <button type="submit" className="btn btn-primary mb-3 px-2 py-1">
                     <VscAdd/>
                 </button>
             </div>
-        </div>
+        </form>
     </>
   )
 }

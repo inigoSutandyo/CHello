@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, Timestamp, where } from "firebase/firestore"
+import { addDoc, collection, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db } from "../util/FireBaseConfig"
 
@@ -55,4 +55,32 @@ export const useWorkspaceById = (workspaceId) => {
     }, [workspaceId]);
     console.log()
     return workspace
+}
+
+export const addNewWorkspace = async (e) => {
+    console.log("Adding")
+    e.preventDefault()
+
+    const name = e.target.elements.workSpaceName.value
+    const userId = e.target.elements.userId.value
+    
+    const userRef = doc(db, 'users', userId)
+
+    const docRef = await addDoc(collection(db, "workspaces"), {
+        name: name,
+        datecreated: Timestamp.now(),
+        admins: [userRef],
+        members: [],
+        boards: [],
+        visibility: "public"
+    });
+
+    console.log(docRef)
+
+    await updateDoc(docRef, {
+        uid: docRef.id
+    })
+    
+    e.target.elements.workSpaceName.value = ""
+    window.location.reload()
 }

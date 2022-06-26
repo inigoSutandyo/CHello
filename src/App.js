@@ -11,6 +11,7 @@ import { AuthNavbarComponent } from './views/components/AuthNavbarComponent';
 import { WorkspacePage } from './views/pages/main/WorkspacePage';
 import { GuestPage } from './views/pages/main/GuestPage';
 import { BoardPage } from './views/pages/main/BoardPage';
+import { KanbanPage } from './views/pages/main/KanbanPage';
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
         <Route path='/' element={<GuestPage/>} />
         <Route path='/workspace' element={userSession!=null && <WorkspacePage userId={userSession.uid}/>} />
         <Route path='/workspace/:workspaceId' element={userSession!=null && <BoardPage userId={userSession.uid}/>} />
+        <Route path='/board/:boardId' element={userSession!=null && <KanbanPage userId={userSession.uid}/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />
 

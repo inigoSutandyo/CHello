@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
-import { useBoards } from '../../../controller/BoardController'
-import { useWorkspace } from '../../../controller/WorkspaceController'
-import { BoardListComponent } from '../../components/BoardListComponent'
+import { addNewWorkspace, useWorkspace } from '../../../controller/WorkspaceController'
 import { LoadingComponent } from '../../components/LoadingComponent'
 import { WorkspaceListComponent } from '../../components/WorkspaceListComponent'
 
@@ -22,7 +20,7 @@ export const WorkspacePage = ({userId}) => {
         <LoadingComponent/>
       ) : <div className='m-3'>
             <h3>Workspace</h3>
-            <WorkspaceListComponent workspaces={workspaces}/>
+            <WorkspaceListComponent workspaces={workspaces} sessionUser={sessionUser} addNewWorkSpace={addNewWorkspace}/>
         </div>}
     </>
   )
