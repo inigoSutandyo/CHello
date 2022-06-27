@@ -51,34 +51,35 @@ export const addNewBoard = async (e) => {
     console.log("Adding")
     e.preventDefault()
 
-    const title = e.target.elements.boardTitle.value
-    const userId = e.target.elements.userId.value
-    const workSpaceId = e.target.elements.workSpaceId.value
+    const title = e.target.elements.listTitle.value
+    const boardId = e.target.elements.boardId.value
 
-    console.log(title)
-    if (!title) {
-        console.log("Title cannot be empty!")
-        return false;
-    }
-    
-    const userRef = doc(db, 'users', userId)
 
-    const docRef = await addDoc(collection(db, "boards"), {
-        title: e.target.elements.boardTitle.value,
+    const boardRef = await addDoc(collection(db, "boards"), {
+        title: title,
         datecreated: Timestamp.now(),
-        admins: [userRef],
-        lists: [],
+        admins: [],
         members: []
     });
-    console.log(docRef)
-
-    await updateDoc(docRef, {
-        uid: docRef.id
+    
+    const listRef = await addDoc(collection(db, `boards/${boardRef.id}/lists`), {
+        title: "TO DO",
+        datecreated: Timestamp.now()
     })
 
-    const workspaceRef = doc(db, "workspaces", workSpaceId)
+    console.log(boardRef)
+
+    await updateDoc(boardRef, {
+        uid: boardRef.id
+    })
+
+    await updateDoc(listRef, {
+        uid: listRef.id
+    })
+    
+    const workspaceRef = doc(db, "workspace", boardId)
     await updateDoc(workspaceRef, {
-        boards: arrayUnion(docRef)
+        boards: arrayUnion(boardRef)
     })
     e.target.elements.boardTitle.value = ""
     window.location.reload()
