@@ -51,8 +51,8 @@ export const addNewBoard = async (e) => {
     console.log("Adding")
     e.preventDefault()
 
-    const title = e.target.elements.listTitle.value
-    const boardId = e.target.elements.boardId.value
+    const title = e.target.elements.boardTitle.value
+    const boardId = e.target.elements.workspaceId.value
 
 
     const boardRef = await addDoc(collection(db, "boards"), {
