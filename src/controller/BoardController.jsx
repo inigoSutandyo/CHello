@@ -52,8 +52,8 @@ export const addNewBoard = async (e) => {
     e.preventDefault()
 
     const title = e.target.elements.boardTitle.value
-    const boardId = e.target.elements.workspaceId.value
-
+    const workSpaceId = e.target.elements.workSpaceId.value
+    const userId = e.target.elements.userId.value
 
     const boardRef = await addDoc(collection(db, "boards"), {
         title: title,
@@ -68,16 +68,18 @@ export const addNewBoard = async (e) => {
     })
 
     console.log(boardRef)
+    const docRef = doc(db,'users',userId)
 
     await updateDoc(boardRef, {
-        uid: boardRef.id
+        uid: boardRef.id,
+        admins: arrayUnion(docRef)
     })
 
     await updateDoc(listRef, {
         uid: listRef.id
     })
     
-    const workspaceRef = doc(db, "workspace", boardId)
+    const workspaceRef = doc(db, "workspaces", workSpaceId)
     await updateDoc(workspaceRef, {
         boards: arrayUnion(boardRef)
     })

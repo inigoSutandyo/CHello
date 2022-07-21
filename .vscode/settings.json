@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.jsp": "jsp",
+        "type_traits": "cpp",
+        "typeinfo": "cpp"
+    }
+}

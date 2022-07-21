@@ -1,8 +1,12 @@
 import React from 'react'
+import { useState } from 'react'
 import { useCards } from '../../controller/CardController'
+import { CardModalComponent } from './CardModalComponent'
+import { ModalComponent } from './ModalComponent'
 
-export const KanbanCardComponent = ({kanban, board}) => {
+export const KanbanCardComponent = ({kanban, board, setIsModal}) => {
   const cards = useCards(kanban, board)
+
   return (
     <div>
         {cards == null || cards.length === 0 ? <p>Empty</p> : (
@@ -18,10 +22,11 @@ export const KanbanCardComponent = ({kanban, board}) => {
                         <h6 className="card-title text-muted">{c.title}</h6>
                         <p className="text-muted">{c.description}</p>
                         
-                        {/* <a class="btn btn-outline-primary btn-sm" href="#">View</a> */}
+                        <a className="btn btn-outline-primary btn-sm" onClick={()=>setIsModal(true)}>View</a>
                     </div>
                 </div>
             )
+            
         )}
     </div>
   )

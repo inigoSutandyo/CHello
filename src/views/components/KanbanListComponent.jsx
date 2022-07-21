@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { KanbanCardComponent } from './KanbanCardComponent'
 import { VscAdd } from "react-icons/vsc";
 
-export const KanbanListComponent = ({kanbans, board, addNewList, addNewCard}) => {
+export const KanbanListComponent = ({kanbans, board, addNewList, addNewCard, setIsModal}) => {
 
   return (
     <>
@@ -23,13 +23,14 @@ export const KanbanListComponent = ({kanbans, board, addNewList, addNewCard}) =>
                 <h5 className='fs-2 fw-bold'>
                     No Lists created yet. Why don't you go ahead and create one?
                 </h5> : (
+                    
                     (kanbans.map(k => 
                         <div className="card card-border-primary mx-3" style={{width: "20 rem"}} key={k.uid}>
                             <div className="card-header">
                                 <h4 className="card-title">{k.title}</h4>
                             </div>
                             <div className="card-body p-3">
-                                <KanbanCardComponent kanban={k} board={board}/>
+                                <KanbanCardComponent kanban={k} board={board} setIsModal={setIsModal}/>
                             </div>
                             <form className="row g-2 mx-2 mt-5 p-1" onSubmit={addNewCard}>
                                 <input type="hidden" name="boardId" id="boardId" value={board.uid}/>
