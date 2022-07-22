@@ -1,7 +1,7 @@
 import { doc } from 'firebase/firestore'
 import React from 'react'
-import { inviteUser } from '../../controller/InviteController'
-import { useWorkspaceUsers } from '../../controller/WorkspaceController'
+import { inviteUser } from '../../../controller/InviteController'
+import { useWorkspaceUsers } from '../../../controller/WorkspaceController'
 import { VscAdd } from "react-icons/vsc"; 
 
 export const WorkspaceMemberComponent = ({workSpace, userId}) => {

@@ -5,9 +5,8 @@ import {
   useWorkspace,
 } from "../../../controller/WorkspaceController";
 import { LoadingComponent } from "../../components/LoadingComponent";
-import { ModalComponent } from "../../components/ModalComponent";
-import { WorkspaceListComponent } from "../../components/WorkspaceListComponent";
-import { WorkspaceMemberComponent } from "../../components/WorkspaceMemberComponent";
+import { WorkspaceListComponent } from "../../components/workspaces/WorkspaceListComponent";
+
 
 export const WorkspacePage = ({ userId }) => {
   const [updater, setUpdater] = useState(0);

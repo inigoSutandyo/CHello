@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { db } from "../util/FireBaseConfig"
 
 
-export const useKanban = (board) => {
+export const useKanban = (board, updater) => {
     const [lists, setLists] = useState(null)
 
     useEffect(() => {
@@ -33,7 +33,7 @@ export const useKanban = (board) => {
         return () => {
             setLists(null)
         }
-    }, [board])
+    }, [updater])
 
     // console.log(lists)
     return lists
@@ -45,18 +45,28 @@ export const addNewList = async (e) => {
     const title = e.target.elements.listTitle.value
     const boardId = e.target.elements.boardId.value
     
-
-    // const boardRef = doc(db, 'boards',boardId);
-
-    addDoc(collection(db, `/boards/${boardId}/lists`), {
+    await addDoc(collection(db, `/boards/${boardId}/lists`), {
         title: title,
         datecreated: Timestamp.now()
-    }).then(async (docRef) => {
-        await updateDoc(docRef, {
-            uid: docRef.id
-        })
-        window.location.reload()
     })
 
-    
+    return ""
+}
+
+export const addTemplateList = async (boardId) => {
+    const listRef = await addDoc(collection(db, `boards/${boardId}/lists`), {
+        title: "TO DO",
+        datecreated: Timestamp.now()
+    })
+
+    return listRef
+}
+
+export const updateTitleList = async (title, listId, boardId) => {
+    if (!title) {
+        return
+    }
+    await updateDoc(doc(db, `boards/${boardId}/lists`,listId), {
+        title: title
+    })
 }

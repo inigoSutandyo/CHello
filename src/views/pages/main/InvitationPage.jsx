@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
 import { useInvite } from '../../../controller/InviteController'
-import { InviteListComponent } from '../../components/InviteListComponent'
+import { InviteListComponent } from '../../components/invites/InviteListComponent'
 
 export const InvitationPage = ({userId}) => {
   const [updater, setUpdater] = useState(0)

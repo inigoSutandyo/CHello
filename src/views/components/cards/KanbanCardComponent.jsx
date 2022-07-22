@@ -1,12 +1,11 @@
 import React from 'react'
 import { useState } from 'react'
-import { useCards } from '../../controller/CardController'
-import { CardModalComponent } from './CardModalComponent'
-import { ModalComponent } from './ModalComponent'
+import { useCards } from '../../../controller/CardController'
 
-export const KanbanCardComponent = ({kanban, board, setIsModal, setCard}) => {
-  const cards = useCards(kanban, board)
 
+export const KanbanCardComponent = ({kanban, board, setIsModal, setCard, setKanban, cardUpdater}) => {
+  const cards = useCards(kanban.uid, board, cardUpdater)
+  
   return (
     <div>
         {cards == null || cards.length === 0 ? <p>Empty</p> : (
@@ -25,6 +24,8 @@ export const KanbanCardComponent = ({kanban, board, setIsModal, setCard}) => {
                         <a className="btn btn-outline-primary btn-sm" onClick={()=>{
                             setIsModal(true)
                             setCard(c)
+                            setKanban(kanban)
+                            // console.log(card)
                         }}>View</a>
                     </div>
                 </div>

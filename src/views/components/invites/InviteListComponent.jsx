@@ -1,5 +1,5 @@
 import React from 'react'
-import { acceptInvite, destroyInvite } from '../../controller/InviteController'
+import { acceptInvite, destroyInvite } from '../../../controller/InviteController'
 
 export const InviteListComponent = ({invites}) => {
   return (

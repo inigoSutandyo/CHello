@@ -6,10 +6,10 @@ import {
   useBoards,
 } from "../../../controller/BoardController";
 import { useWorkspaceById } from "../../../controller/WorkspaceController";
-import { BoardListComponent } from "../../components/BoardListComponent";
+import { BoardListComponent } from "../../components/boards/BoardListComponent";
 import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";
-import { WorkspaceMemberComponent } from "../../components/WorkspaceMemberComponent";
+import { WorkspaceMemberComponent } from "../../components/workspaces/WorkspaceMemberComponent";
 
 export const BoardPage = ({ userId }) => {
   const { workspaceId } = useParams();

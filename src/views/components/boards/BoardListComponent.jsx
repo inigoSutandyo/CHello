@@ -2,7 +2,7 @@ import { VscAdd } from "react-icons/vsc";
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom' 
 import {FaTrashAlt} from 'react-icons/fa'
-import { LoadingComponent } from "./LoadingComponent";
+import { LoadingComponent } from "../LoadingComponent";
 
 
 export const BoardListComponent = ({boards, sessionUser, workSpaceId, addNewBoard, deleteBoard, updater, setUpdater}) => {

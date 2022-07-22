@@ -1,7 +1,7 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db } from "../util/FireBaseConfig"
-import { addTemplateList } from "./ListController"
+import { addTemplateList } from "./KanbanController"
 import { addBoard, removeBoard } from "./WorkspaceController"
 
 export const useBoards = (userId, workspace, updater) => {
