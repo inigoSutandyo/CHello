@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { KanbanCardComponent } from './KanbanCardComponent'
 import { VscAdd } from "react-icons/vsc";
 
-export const KanbanListComponent = ({kanbans, board, addNewList, addNewCard, setIsModal}) => {
+export const KanbanListComponent = ({kanbans, board, addNewList, addNewCard, setIsModal, setCard}) => {
 
   return (
     <>
@@ -30,7 +30,7 @@ export const KanbanListComponent = ({kanbans, board, addNewList, addNewCard, set
                                 <h4 className="card-title">{k.title}</h4>
                             </div>
                             <div className="card-body p-3">
-                                <KanbanCardComponent kanban={k} board={board} setIsModal={setIsModal}/>
+                                <KanbanCardComponent kanban={k} board={board} setIsModal={setIsModal} setCard={setCard}/>
                             </div>
                             <form className="row g-2 mx-2 mt-5 p-1" onSubmit={addNewCard}>
                                 <input type="hidden" name="boardId" id="boardId" value={board.uid}/>

@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../util/FireBaseConfig";
 
@@ -33,12 +33,13 @@ export const inviteUser = async (sourceId, memberEmail, spaceId, spaceType, memb
     // window.location.reload();
 }
 
-export const useInvite = (userId) => {
+export const useInvite = (userId, updater) => {
     const [invites, setInvites] = useState([])
 
     useEffect(() => {
+        if (!userId) {return}
       const loadData = async () => {
-        const userRef = doc(db, 'users', userId);
+        const userRef = doc(db, "users", userId);
         const q = query(collection(db, 'invitations'), where('destinationRef','==',userRef));
         const querySnapshot = await getDocs(q);
         const inviteList = []
@@ -52,8 +53,23 @@ export const useInvite = (userId) => {
         setInvites(inviteList);
       }
       loadData();
-    }, [userId])
+    }, [updater])
     
     return invites
 }
   
+export const acceptInvite = async (spaceRef, userRef, inviteId, memberType) => {
+    // update workspace
+    if (memberType == "member" ) {
+        await updateDoc(spaceRef, {
+            members: arrayUnion(userRef)
+        })
+    }
+        
+
+    destroyInvite(inviteId);
+}
+
+export const destroyInvite = async (inviteId) => {
+    await(deleteDoc(doc(db,'invitations',inviteId)));
+}

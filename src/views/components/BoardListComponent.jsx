@@ -5,9 +5,8 @@ import {FaTrashAlt} from 'react-icons/fa'
 import { LoadingComponent } from "./LoadingComponent";
 
 
-export const BoardListComponent = ({boards, sessionUser, workSpaceId, addNewBoard, deleteBoard}) => {
-//   const [idToBeDeleted, setIdToBeDeleted] = useState(null)
-//   console.log(boards + " " + typeof(boards))
+export const BoardListComponent = ({boards, sessionUser, workSpaceId, addNewBoard, deleteBoard, updater, setUpdater}) => {
+
   return (
     <>
         <div className='mx-2 mt-5 d-flex flex-wrap'>
@@ -27,7 +26,9 @@ export const BoardListComponent = ({boards, sessionUser, workSpaceId, addNewBoar
                                         </p>
                                     </Link>
                                     <a className="btn text-danger fs-4" onClick={ () => {
-                                        deleteBoard(b.uid, workSpaceId)
+                                        deleteBoard(b.uid, workSpaceId).then(()=>{
+                                            setUpdater(updater+1)
+                                        })
                                     }}>
                                         <FaTrashAlt/>
                                     </a>
@@ -38,7 +39,11 @@ export const BoardListComponent = ({boards, sessionUser, workSpaceId, addNewBoar
                 )}
         </div>
         <form className="row g-2 mx-2 mt-5 p-1" onSubmit={(e)=> {
-                addNewBoard(e)
+                addNewBoard(e).then(()=>{
+                    console.log("update!")
+                    setUpdater(updater+1)
+                    console.log(updater)
+                })
             }}>
             <input type="hidden" name="workSpaceId" id="workSpaceId" value={workSpaceId}/>
             <input type="hidden" name="userId" id="userId" value={sessionUser}/>

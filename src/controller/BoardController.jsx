@@ -1,8 +1,10 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db } from "../util/FireBaseConfig"
+import { addTemplateList } from "./ListController"
+import { addBoard, removeBoard } from "./WorkspaceController"
 
-export const useBoards = (userId, workspace) => {
+export const useBoards = (userId, workspace, updater) => {
     const [boards, setBoards] = useState(null)
     useEffect(() => {
         if (userId == null || workspace == null) {
@@ -22,16 +24,17 @@ export const useBoards = (userId, workspace) => {
                 } 
                 const docRef = doc(db,'users',userId)
                 // , where('uid','in',boardRef)
-                const q = query(collection(db, "boards"), where('admins', "array-contains", docRef), where('uid','in',boardRef))
+                const q = query(collection(db, "boards"), where('admins', "array-contains", docRef))
                 const querySnapshot = await getDocs(q)
 
                 if (querySnapshot) {
                     const documents = []
                     querySnapshot.forEach(element => {
-                        console.log(querySnapshot)
-                        documents.push({
-                            ...element.data()
-                        })
+                        if (boardRef.indexOf(element.id) != null) {
+                            documents.push({
+                                ...element.data()
+                            })
+                        }
                     });
     
                     setBoards(documents)
@@ -42,16 +45,21 @@ export const useBoards = (userId, workspace) => {
             }
         }
         loadQuery()
-    }, [workspace])
+    }, [updater])
+    // console.log(updater)
     return boards;
 }
 
 
 export const addNewBoard = async (e) => {
-    console.log("Adding")
+    console.log("Adding Board")
     e.preventDefault()
 
-    const title = e.target.elements.boardTitle.value
+    const title = e.target.elements.boardTitle.value.trim()
+
+    if (!title) {
+        return ""
+    }
     const workSpaceId = e.target.elements.workSpaceId.value
     const userId = e.target.elements.userId.value
 
@@ -61,44 +69,27 @@ export const addNewBoard = async (e) => {
         admins: [],
         members: []
     });
-    
-    const listRef = await addDoc(collection(db, `boards/${boardRef.id}/lists`), {
-        title: "TO DO",
-        datecreated: Timestamp.now()
-    })
+    await addListInBoard(boardRef.id)
+    await addAdminBoard(boardRef.id,userId);
+    await addBoard(workSpaceId, boardRef);
 
-    console.log(boardRef)
-    const docRef = doc(db,'users',userId)
-
-    await updateDoc(boardRef, {
-        uid: boardRef.id,
-        admins: arrayUnion(docRef)
-    })
-
-    await updateDoc(listRef, {
-        uid: listRef.id
-    })
-    
-    const workspaceRef = doc(db, "workspaces", workSpaceId)
-    await updateDoc(workspaceRef, {
-        boards: arrayUnion(boardRef)
-    })
     e.target.elements.boardTitle.value = ""
-    window.location.reload()
+    console.log("done adding")
+    return ""
+}
+
+export const closeBoard = async (boardId, workSpaceId) => {
+
 }
 
 // delete permanent
 export const deleteBoard = async (boardId, workSpaceId) => {
     console.log("Deleting")
     const boardRef = doc(db, 'boards', boardId)
-    const workspaceRef = doc(db, "workspaces", workSpaceId)
 
-    await updateDoc(workspaceRef, {
-        boards: arrayRemove(boardRef)
-    }).then(async () => {
-        await deleteDoc(boardRef)
-    })
-    window.location.reload()
+    await removeBoard(workSpaceId,boardRef)
+    await deleteDoc(boardRef)
+    return ""
 }
 
 export const useBoardById = (boardId) => {
@@ -118,3 +109,18 @@ export const useBoardById = (boardId) => {
     return board
 }
 
+export const addAdminBoard = async (boardId, userId) => {
+    const docRef = doc(db,'users',userId)
+    const boardRef = doc(db,'boards',boardId)
+    await updateDoc(boardRef, {
+        uid: boardRef.id,
+        admins: arrayUnion(docRef)
+    })
+}
+export const addListInBoard = async (boardId) => {
+    addTemplateList(boardId).then(async (listRef) => {
+        await updateDoc(listRef, {
+            uid: listRef.id
+        })
+    })
+}

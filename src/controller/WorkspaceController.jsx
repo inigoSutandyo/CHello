@@ -1,5 +1,6 @@
 import {
   addDoc,
+  arrayRemove,
   arrayUnion,
   collection,
   doc,
@@ -13,44 +14,82 @@ import {
 import { useEffect, useState } from "react";
 import { db } from "../util/FireBaseConfig";
 
-export const useWorkspace = (userId) => {
+export const useWorkspace = (userId, updater) => {
   const [workspace, setWorkspace] = useState(null);
+  const [publicSpace, setPublicSpace] = useState(null);
 
   useEffect(() => {
+    
     if (userId == null) {
       return;
     }
+
+    // console.log("test")
+
     const docRef = doc(db, "users", userId);
     const q = query(
       collection(db, "workspaces"),
       where("admins", "array-contains", docRef)
     );
+    const q2 = query(
+      collection(db, "workspaces"),
+      where("members", "array-contains", docRef)
+    );
+    const q3 = query(
+      collection(db, "workspaces"),
+      where("visibility", "==", "public")
+    );
     const loadQuery = async () => {
       try {
+        const documents = [];
+        const publicDocs = [];
+        const uidList = [];
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
+        const querySnapshot2 = await getDocs(q2);
+        const querySnapshot3 = await getDocs(q3);
+
         if (querySnapshot) {
-          const documents = [];
           querySnapshot.forEach((element) => {
-            console.log(querySnapshot);
             documents.push({
               ...element.data(),
             });
+            uidList.push(element.id);
           });
-
-          setWorkspace(documents);
         }
+        
+        if (querySnapshot2) {
+          querySnapshot2.forEach((element) => {
+            documents.push({
+              ...element.data(),
+            });
+            uidList.push(element.id);
+          });
+        }
+
+        if (querySnapshot3) {
+          querySnapshot3.forEach((element) => {
+            if (uidList.indexOf(element.id) == -1) {
+
+              publicDocs.push({
+                ...element.data(),
+              });
+              uidList.push(element.id)
+            }
+          });
+        }
+        setWorkspace(documents);
+        setPublicSpace(publicDocs);
       } catch (e) {
         console.log(e);
       }
     };
     loadQuery();
-  }, [userId]);
-
+  }, [updater]);
+  // console.log(workspace)
   return workspace;
 };
 
-export const useWorkspaceById = (workspaceId) => {
+export const useWorkspaceById = (workspaceId, updater) => {
   const [workspace, setWorkspace] = useState(null);
 
   useEffect(() => {
@@ -63,8 +102,8 @@ export const useWorkspaceById = (workspaceId) => {
       }
     };
     loadAsync();
-  }, [workspaceId]);
-  console.log();
+  }, [updater]);
+  // console.log(workspace);
   return workspace;
 };
 
@@ -72,9 +111,11 @@ export const addNewWorkspace = async (e) => {
   console.log("Adding");
   e.preventDefault();
 
-  const name = e.target.elements.workSpaceName.value;
+  const name = e.target.elements.workSpaceName.value.trim();
   const userId = e.target.elements.userId.value;
-
+  if (!name) {
+    return ""
+  }
   const userRef = doc(db, "users", userId);
 
   const docRef = await addDoc(collection(db, "workspaces"), {
@@ -93,7 +134,8 @@ export const addNewWorkspace = async (e) => {
   });
 
   e.target.elements.workSpaceName.value = "";
-  window.location.reload();
+  return "";
+  // window.location.reload();
 };
 
 export const useWorkspaceUsers = (workSpace) => {
@@ -141,7 +183,7 @@ export const useWorkspaceUsers = (workSpace) => {
               });
             } 
           });
-          console.log(querySnapshot);
+          // console.log(querySnapshot);
           // adminRefs.forEach(admin => {
           //     const q = query(collection(db, "boards"), where('admins', "array-contains", docRef), where('uid','in',boardRef))
           // });
@@ -157,7 +199,7 @@ export const useWorkspaceUsers = (workSpace) => {
     loadData();
   }, [workSpace]);
 
-  console.log(admins);
+  // console.log(admins);
   return { admins, members };
 };
 
@@ -177,3 +219,17 @@ export const addAdmin = async (e) => {
   // e.target.elements.value = ""
   window.location.reload();
 };
+
+export const addBoard = async (workspaceId, boardRef) => {
+  const workspaceRef = doc(db, "workspaces", workspaceId)
+  await updateDoc(workspaceRef, {
+      boards: arrayUnion(boardRef)
+  })
+}
+
+export const removeBoard = async (workspaceId, boardRef) => {
+  const workspaceRef = doc(db, "workspaces", workspaceId)
+  await updateDoc(workspaceRef, {
+      boards: arrayRemove(boardRef)
+  })
+}

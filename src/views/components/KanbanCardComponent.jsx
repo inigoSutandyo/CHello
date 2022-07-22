@@ -4,7 +4,7 @@ import { useCards } from '../../controller/CardController'
 import { CardModalComponent } from './CardModalComponent'
 import { ModalComponent } from './ModalComponent'
 
-export const KanbanCardComponent = ({kanban, board, setIsModal}) => {
+export const KanbanCardComponent = ({kanban, board, setIsModal, setCard}) => {
   const cards = useCards(kanban, board)
 
   return (
@@ -22,7 +22,10 @@ export const KanbanCardComponent = ({kanban, board, setIsModal}) => {
                         <h6 className="card-title text-muted">{c.title}</h6>
                         <p className="text-muted">{c.description}</p>
                         
-                        <a className="btn btn-outline-primary btn-sm" onClick={()=>setIsModal(true)}>View</a>
+                        <a className="btn btn-outline-primary btn-sm" onClick={()=>{
+                            setIsModal(true)
+                            setCard(c)
+                        }}>View</a>
                     </div>
                 </div>
             )

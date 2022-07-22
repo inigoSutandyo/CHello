@@ -1,4 +1,5 @@
 import React from 'react'
+import { acceptInvite, destroyInvite } from '../../controller/InviteController'
 
 export const InviteListComponent = ({invites}) => {
   return (
@@ -10,8 +11,12 @@ export const InviteListComponent = ({invites}) => {
                     <div className="card-body">
                         <h5 className="card-title">From : {i.sourceEmail}</h5>
                         <p className="card-text">Invited you to his {i.spaceType}</p>
-                        <a className="btn btn-primary">Accept</a>
-                        <a className="btn btn-primary">Decline</a>
+                        <a className="btn btn-primary" onClick={()=> {
+                          acceptInvite(i.spaceRef, i.destinationRef, i.uid, i.memberType)
+                        }}>Accept</a>
+                        <a className="btn btn-danger" onClick={()=> {
+                          destroyInvite(i.uid)
+                        }}>Decline</a>
                     </div>
               </div>
             )
