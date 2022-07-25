@@ -12,13 +12,13 @@ import { WorkspacePage } from './views/pages/main/WorkspacePage';
 import { GuestPage } from './views/pages/main/GuestPage';
 import { BoardPage } from './views/pages/main/BoardPage';
 import { KanbanPage } from './views/pages/main/KanbanPage';
-import { InvitationPage } from './views/pages/main/InvitationPage';
+import { NotificationPage } from './views/pages/main/NotificationPage';
 
 
 function App() {
   const [userSession, setUserSession] = useState({})
 
-  onAuthStateChanged(auth, (currentUser) => {
+  onAuthStateChanged(auth.getAuth(), (currentUser) => {
     setUserSession(currentUser);
   })
 
@@ -45,9 +45,9 @@ function App() {
       <Routes>
         <Route path='/' element={<GuestPage/>} />
         <Route path='/workspace' element={userSession!=null && <WorkspacePage userId={userSession.uid}/>} />
-        <Route path='/workspace/:workspaceId' element={userSession!=null && <BoardPage userId={userSession.uid}/>} />
+        <Route path='/workspace/:workspaceId/:membership' element={userSession!=null && <BoardPage userId={userSession.uid}/>} />
         <Route path='/board/:boardId' element={userSession!=null && <KanbanPage userId={userSession.uid}/>} />
-        <Route path='/invitations' element={userSession!=null && <InvitationPage userId={userSession.uid}/>} />
+        <Route path='/invitations' element={userSession!=null && <NotificationPage userId={userSession.uid}/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />
 

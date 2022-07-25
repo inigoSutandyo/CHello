@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import {
   addNewWorkspace,
+  usePublicWorkspace,
   useWorkspace,
 } from "../../../controller/WorkspaceController";
 import { LoadingComponent } from "../../components/LoadingComponent";
@@ -20,23 +21,42 @@ export const WorkspacePage = ({ userId }) => {
   }, [userId]);
 
   const workspaces = useWorkspace(sessionUser, updater);
-
+  const publicWorkspaces = usePublicWorkspace(workspaces)
   return (
     <>
       {workspaces == null || sessionUser == null ? (
         <LoadingComponent />
       ) : (
         <div className="m-3">
-          <div>
-            <h3>Workspace</h3>
+          <div className="mb-2">
+            <div>
+              <h3>My Workspaces</h3>
+            </div>
+            <WorkspaceListComponent
+              workspaces={workspaces}
+              sessionUser={sessionUser}
+              addNewWorkSpace={addNewWorkspace}
+              updater={updater}
+              setUpdater={setUpdater}
+              isMember={true}
+            />
           </div>
-          <WorkspaceListComponent
-            workspaces={workspaces}
-            sessionUser={sessionUser}
-            addNewWorkSpace={addNewWorkspace}
-            updater={updater}
-            setUpdater={setUpdater}
-          />
+          {publicWorkspaces ? (
+            <div className="mb-2">
+              <div>
+                <h3>Public Workspaces</h3>
+              </div>
+              <WorkspaceListComponent
+                workspaces={publicWorkspaces}
+                sessionUser={sessionUser}
+                addNewWorkSpace={addNewWorkspace}
+                updater={updater}
+                setUpdater={setUpdater}
+                isMember={false}
+              />
+            </div>
+          ) : <div></div>}
+
         </div>
       )}
     </>

@@ -12,13 +12,14 @@ import { ModalComponent } from "../../components/ModalComponent";
 import { WorkspaceMemberComponent } from "../../components/workspaces/WorkspaceMemberComponent";
 
 export const BoardPage = ({ userId }) => {
-  const { workspaceId } = useParams();
+  const { workspaceId, membership } = useParams();
+  // console.log(workspaceId)
   const [sessionUser, setSessionUser] = useState(userId);
   const [updater, setUpdater] = useState(0);
   const [workspaceUpdater, setWorkspaceUpdater] = useState(0);
 
   const workspace = useWorkspaceById(workspaceId, workspaceUpdater);
-  
+  // console.log(workspace.uid)
   useEffect(()=> {
     const intervalId = setInterval(()=> {
       setWorkspaceUpdater(workspaceUpdater+1);
@@ -46,9 +47,11 @@ export const BoardPage = ({ userId }) => {
             <p color="text-primary">{workspace.name}</p>
             Boards
           </div>
-          <button className="btn btn-info" onClick={() => setIsModal(true)}>
-            Members
-          </button>
+          {membership != "admin" ? <div></div> : (
+            <button className="btn btn-info" onClick={() => setIsModal(true)}>
+              Members
+            </button>
+          )}
           {!isModal ? (
             <BoardListComponent
               boards={boards}
@@ -58,12 +61,13 @@ export const BoardPage = ({ userId }) => {
               deleteBoard={deleteBoard}
               updater={updater}
               setUpdater={setUpdater}
+              membership = {membership}
             />
           ) : (
             <ModalComponent
               isModal={isModal}
               setIsModal={setIsModal}
-              text={"Workspace Member"}
+              text={"Workspace Members"}
             >
               <WorkspaceMemberComponent workSpace={workspace} userId={userId} />
             </ModalComponent>

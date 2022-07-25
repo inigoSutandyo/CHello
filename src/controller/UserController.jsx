@@ -1,6 +1,7 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth"
 import { auth, db } from "../util/FireBaseConfig"
 import { doc, setDoc } from "firebase/firestore"; 
+import { createUser } from "../factory/UserFactory";
 
 export const registerAuth = async (email, password, confirm) => {
     // console.log(email + " " + password)
@@ -13,33 +14,27 @@ export const registerAuth = async (email, password, confirm) => {
     }
 
     try {
-        const user = await createUserWithEmailAndPassword(auth, email, password)
-        console.log(user)
-        await setDoc(doc(db, "users", user.user.uid), {
-            email: email,
-            uid: user.user.uid,
-            name: email.substr(0, email.indexOf('@')),
-            password: password
-        })
+        const user = await createUserWithEmailAndPassword(auth.getAuth(), email, password)
+        const userData = createUser(user.user.uid, email, email.substr(0, email.indexOf('@')), password).toDictionary()
+        await setDoc(doc(db.getDB(), "users", user.user.uid), userData)
         return ""
     } catch (error) {
-        console.log(error.message)
-        return error.message;
+        return 'Register failed, email already taken!!';
     }
     
 }
 
 export const loginAuth = async (email, password) =>{
     try {
-        const user = await signInWithEmailAndPassword(auth, email, password)
+        const user = await signInWithEmailAndPassword(auth.getAuth(), email, password)
         return ""
     } catch (error) {
-        return error.message;
+        return 'Login failed, user not found!';
     }
 }
 
 export const logoutAuth = async () => {
-    await signOut(auth);
+    await signOut(auth.getAuth());
 }
 
 

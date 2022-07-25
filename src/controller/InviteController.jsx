@@ -4,22 +4,22 @@ import { db } from "../util/FireBaseConfig";
 
 export const inviteUser = async (sourceId, memberEmail, spaceId, spaceType, memberType) => {
     
-    const spaceRef = doc(db, spaceType, spaceId);
+    const spaceRef = doc(db.getDB(), spaceType, spaceId);
 
-    const sourceRef = doc(db, "users", sourceId);
+    const sourceRef = doc(db.getDB(), "users", sourceId);
     const sourceSnap = await getDoc(sourceRef)
 
-    const q = query(collection(db, 'users'), where('email','==',memberEmail));
+    const q = query(collection(db.getDB(), 'users'), where('email','==',memberEmail));
     const querySnapshot = await getDocs(q);
     const destinationRef = []
     querySnapshot.forEach((document) => {
-        destinationRef.push(doc(db, "users", document.id))
+        destinationRef.push(doc(db.getDB(), "users", document.id))
     });
     // console.log(destinationRef[0])
 
     
     if (destinationRef[0]) {
-        await addDoc(collection(db, 'invitations'), {
+        await addDoc(collection(db.getDB(), 'invitations'), {
             sourceRef: sourceRef,
             sourceEmail: sourceSnap.data().email,
             destinationRef: destinationRef[0],
@@ -39,8 +39,8 @@ export const useInvite = (userId, updater) => {
     useEffect(() => {
         if (!userId) {return}
       const loadData = async () => {
-        const userRef = doc(db, "users", userId);
-        const q = query(collection(db, 'invitations'), where('destinationRef','==',userRef));
+        const userRef = doc(db.getDB(), "users", userId);
+        const q = query(collection(db.getDB(), 'invitations'), where('destinationRef','==',userRef));
         const querySnapshot = await getDocs(q);
         const inviteList = []
 
@@ -71,5 +71,5 @@ export const acceptInvite = async (spaceRef, userRef, inviteId, memberType) => {
 }
 
 export const destroyInvite = async (inviteId) => {
-    await(deleteDoc(doc(db,'invitations',inviteId)));
+    await(deleteDoc(doc(db.getDB(),'invitations',inviteId)));
 }

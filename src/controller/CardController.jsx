@@ -1,4 +1,4 @@
-import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, Timestamp, updateDoc } from "firebase/firestore"
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, namedQuery, query, Timestamp, updateDoc, where } from "firebase/firestore"
 import { useEffect } from "react"
 import { useState } from "react"
 import { db } from "../util/FireBaseConfig"
@@ -14,7 +14,7 @@ export const useCards = (kanbanId, board, cardUpdater) => {
 
         const loadData = async () => {
 
-            const docSnap = await getDoc(doc(db, `boards/${board.uid}/lists`, kanbanId))
+            const docSnap = await getDoc(doc(db.getDB(), `boards/${board.uid}/lists`, kanbanId))
             if (!docSnap.data().cards) {
                 return
             }
@@ -23,7 +23,7 @@ export const useCards = (kanbanId, board, cardUpdater) => {
                 refList.push(ref.id)
             })
             const cardArr = []
-            const q = query(collection(db, `boards/${board.uid}/cards`))
+            const q = query(collection(db.getDB(), `boards/${board.uid}/cards`))
             const querySnapshot = await getDocs(q)
 
             if (querySnapshot) {
@@ -53,15 +53,13 @@ export const addNewCard = async (e) => {
     const boardId = e.target.elements.boardId.value
     const listId = e.target.elements.listId.value
 
-    // const boardRef = doc(db, 'boards',boardId);
-
-    const docRef = await addDoc(collection(db, `/boards/${boardId}/cards`), {
+    const docRef = await addDoc(collection(db.getDB(), `/boards/${boardId}/cards`), {
         title: title,
         description: "This is a description",
         datecreated: Timestamp.now()
     })
     // console.log(docRef.path)
-    await updateDoc(doc(db, `/boards/${boardId}/lists`, listId), {
+    await updateDoc(doc(db.getDB(), `/boards/${boardId}/lists`, listId), {
         cards: arrayUnion(docRef)
     })
 
@@ -69,12 +67,12 @@ export const addNewCard = async (e) => {
 }
 
 export const updateDescription = async (desc, cardId, boardId) => {
-    await updateDoc(doc(db,`boards/${boardId}/cards/`, cardId), {
+    await updateDoc(doc(db.getDB(),`boards/${boardId}/cards/`, cardId), {
         description: desc
     })
 }
 export const updateTitle = async (title, cardId, boardId) => {
-    await updateDoc(doc(db,`boards/${boardId}/cards/`, cardId), {
+    await updateDoc(doc(db.getDB(),`boards/${boardId}/cards/`, cardId), {
         title: title
     })
 }
@@ -87,7 +85,7 @@ export const addCheckList = async (cardId, boardId, content) => {
         console.log("error")
         return
     }
-    await addDoc(collection(db,`boards/${boardId}/cards/${cardId}/checklists`), {
+    await addDoc(collection(db.getDB(),`boards/${boardId}/cards/${cardId}/checklists`), {
         content: content,
         isChecked: false,
     })
@@ -113,7 +111,7 @@ export const useCheckList = (card, boardId) => {
         const loadData = async () => {
             try {
                 
-                const q = query(collection(db,`boards/${boardId}/cards/${card.uid}/checklists`))
+                const q = query(collection(db.getDB(),`boards/${boardId}/cards/${card.uid}/checklists`))
                 const querySnapshot = await getDocs(q)
                 if (querySnapshot) {
                     querySnapshot.forEach((doc) => {
@@ -132,4 +130,70 @@ export const useCheckList = (card, boardId) => {
     }, [card])
     // console.log(checklist)
     return checklist
+}
+export const useCardComment = (cardId, boardId) => {
+    const [comments, setComments] = useState([])
+
+    useEffect(() => {
+        if (!cardId || !boardId) return
+
+        const commentList = []
+        
+        const loadData = async () => {
+            const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+            const q = query(collection(db.getDB(),  `boards/${boardId}/comments`), 
+                where('card','==',cardRef))
+            
+            try {
+                
+                const querySnapshot = await getDocs(q)
+                if (querySnapshot) {
+                    querySnapshot.forEach((doc) => {
+                        commentList.push({
+                            uid: doc.id,
+                            cardId: cardId,
+                            ...doc.data()
+                        })
+                    })
+                }
+                setComments(commentList)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        loadData()
+    }, [cardId])
+    console.log(comments)
+    return comments
+}
+
+export const addCardComment = async (cardId, boardId, userId, content) => {
+    if (!content.trim()) return
+
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+    const userRef = doc(db.getDB(), `users`, userId)
+
+    const user = await getDoc(userRef)
+    if (!user) {
+        console.log("User not found")
+        return
+    }
+    await addDoc(collection(db.getDB(), `boards/${boardId}/comments`), {
+        content: content,
+        user: userRef,
+        card: cardRef,
+        userEmail: user.data().email
+    })
+}
+
+export const addLabel = async (cardId, boardId, lblname, color) => {
+    if (!lblname.trim()) return
+
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+
+    await addDoc(collection(db.getDB(), `boards/${boardId}/labels`), {
+        name: lblname,
+        card: cardRef,
+        color: color
+    })
 }

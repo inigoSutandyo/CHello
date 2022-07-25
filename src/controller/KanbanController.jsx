@@ -15,7 +15,7 @@ export const useKanban = (board, updater) => {
 
         const loadData = async () => {
             const listArr = []
-            const q = query(collection(db, `boards/${board.uid}/lists`))
+            const q = query(collection(db.getDB(), `boards/${board.uid}/lists`))
             const querySnapshot = await getDocs(q)
             if (querySnapshot) {
                 querySnapshot.forEach((doc) => {
@@ -45,7 +45,7 @@ export const addNewList = async (e) => {
     const title = e.target.elements.listTitle.value
     const boardId = e.target.elements.boardId.value
     
-    await addDoc(collection(db, `/boards/${boardId}/lists`), {
+    await addDoc(collection(db.getDB(), `/boards/${boardId}/lists`), {
         title: title,
         datecreated: Timestamp.now()
     })
@@ -54,7 +54,7 @@ export const addNewList = async (e) => {
 }
 
 export const addTemplateList = async (boardId) => {
-    const listRef = await addDoc(collection(db, `boards/${boardId}/lists`), {
+    const listRef = await addDoc(collection(db.getDB(), `boards/${boardId}/lists`), {
         title: "TO DO",
         datecreated: Timestamp.now()
     })
@@ -66,7 +66,7 @@ export const updateTitleList = async (title, listId, boardId) => {
     if (!title) {
         return
     }
-    await updateDoc(doc(db, `boards/${boardId}/lists`,listId), {
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/lists`,listId), {
         title: title
     })
 }

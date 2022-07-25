@@ -3,6 +3,7 @@ import {
   arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -16,7 +17,6 @@ import { db } from "../util/FireBaseConfig";
 
 export const useWorkspace = (userId, updater) => {
   const [workspace, setWorkspace] = useState(null);
-  const [publicSpace, setPublicSpace] = useState(null);
 
   useEffect(() => {
     
@@ -25,35 +25,27 @@ export const useWorkspace = (userId, updater) => {
     }
 
     // console.log("test")
-
-    const docRef = doc(db, "users", userId);
+    const docRef = doc(db.getDB(), "users", userId);
     const q = query(
-      collection(db, "workspaces"),
+      collection(db.getDB(), "workspaces"),
       where("admins", "array-contains", docRef)
     );
     const q2 = query(
-      collection(db, "workspaces"),
+      collection(db.getDB(), "workspaces"),
       where("members", "array-contains", docRef)
-    );
-    const q3 = query(
-      collection(db, "workspaces"),
-      where("visibility", "==", "public")
     );
     const loadQuery = async () => {
       try {
         const documents = [];
-        const publicDocs = [];
-        const uidList = [];
         const querySnapshot = await getDocs(q);
         const querySnapshot2 = await getDocs(q2);
-        const querySnapshot3 = await getDocs(q3);
 
         if (querySnapshot) {
           querySnapshot.forEach((element) => {
             documents.push({
               ...element.data(),
+              membership: "admin"
             });
-            uidList.push(element.id);
           });
         }
         
@@ -61,40 +53,73 @@ export const useWorkspace = (userId, updater) => {
           querySnapshot2.forEach((element) => {
             documents.push({
               ...element.data(),
+              membership: "member"
             });
-            uidList.push(element.id);
+
           });
         }
 
-        if (querySnapshot3) {
-          querySnapshot3.forEach((element) => {
-            if (uidList.indexOf(element.id) == -1) {
-
-              publicDocs.push({
-                ...element.data(),
-              });
-              uidList.push(element.id)
-            }
-          });
-        }
         setWorkspace(documents);
-        setPublicSpace(publicDocs);
       } catch (e) {
         console.log(e);
       }
     };
     loadQuery();
   }, [updater]);
-  // console.log(workspace)
+
   return workspace;
 };
+
+export const usePublicWorkspace = (workspaces) => {
+  const [publicSpace, setPublicSpace] = useState(null);
+
+  useEffect(() => {
+    
+    if (workspaces == null) {
+      return;
+    }
+    const uidList = []
+    workspaces.forEach((workspace) => {
+      uidList.push(workspace.uid)
+    })
+    // console.log(uidList)
+
+    const q = query(
+      collection(db.getDB(), "workspaces"),
+      where("visibility", "==", "public")
+    );
+    const loadQuery = async () => {
+      try {
+        const publicDocs = [];
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot) {
+          querySnapshot.forEach((element) => {
+            if (uidList.indexOf(element.id) == -1) {
+              publicDocs.push({
+                ...element.data(),
+                membership: "none"
+              });
+            }
+          });
+        }
+        setPublicSpace(publicDocs);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    loadQuery();
+  }, [workspaces]);
+
+  return publicSpace;
+}
 
 export const useWorkspaceById = (workspaceId, updater) => {
   const [workspace, setWorkspace] = useState(null);
 
   useEffect(() => {
     const loadAsync = async () => {
-      const docRef = doc(db, "workspaces", workspaceId);
+      const docRef = doc(db.getDB(), "workspaces", workspaceId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
@@ -116,9 +141,9 @@ export const addNewWorkspace = async (e) => {
   if (!name) {
     return ""
   }
-  const userRef = doc(db, "users", userId);
+  const userRef = doc(db.getDB(), "users", userId);
 
-  const docRef = await addDoc(collection(db, "workspaces"), {
+  const docRef = await addDoc(collection(db.getDB(), "workspaces"), {
     name: name,
     datecreated: Timestamp.now(),
     admins: [userRef],
@@ -137,6 +162,10 @@ export const addNewWorkspace = async (e) => {
   return "";
   // window.location.reload();
 };
+
+export const deleteWorkspace = async (workspaceId) => {
+  await deleteDoc(doc(db.getDB(), 'workspace', workspaceId))
+}
 
 export const useWorkspaceUsers = (workSpace) => {
   const [admins, setAdmins] = useState([]) 
@@ -166,7 +195,7 @@ export const useWorkspaceUsers = (workSpace) => {
           });
         }
 
-        const querySnapshot = await getDocs(collection(db, "users"));
+        const querySnapshot = await getDocs(collection(db.getDB(), "users"));
         if (querySnapshot) {
           querySnapshot.forEach((doc) => {
             if (adminRefs.indexOf(doc.id) != -1) {
@@ -183,12 +212,7 @@ export const useWorkspaceUsers = (workSpace) => {
               });
             } 
           });
-          // console.log(querySnapshot);
-          // adminRefs.forEach(admin => {
-          //     const q = query(collection(db, "boards"), where('admins', "array-contains", docRef), where('uid','in',boardRef))
-          // });
         }
-        // TODO change from user into 3 separate roles
         setAdmins(adminList);
         setMembers(memberList);
 
@@ -209,8 +233,8 @@ export const addAdmin = async (e) => {
   const workSpaceId = e.target.elements.workSpaceId.value;
   const userId = e.target.elements.userId.value;
 
-  const workSpaceRef = doc(db, "workspaces", workSpaceId);
-  const userRef = doc(db, "users", userId);
+  const workSpaceRef = doc(db.getDB(), "workspaces", workSpaceId);
+  const userRef = doc(db.getDB(), "users", userId);
 
   await updateDoc(workSpaceRef, {
     admins: arrayUnion(userRef),
@@ -221,14 +245,14 @@ export const addAdmin = async (e) => {
 };
 
 export const addBoard = async (workspaceId, boardRef) => {
-  const workspaceRef = doc(db, "workspaces", workspaceId)
+  const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
   await updateDoc(workspaceRef, {
       boards: arrayUnion(boardRef)
   })
 }
 
 export const removeBoard = async (workspaceId, boardRef) => {
-  const workspaceRef = doc(db, "workspaces", workspaceId)
+  const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
   await updateDoc(workspaceRef, {
       boards: arrayRemove(boardRef)
   })

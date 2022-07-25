@@ -20,6 +20,43 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-export const db = getFirestore(app);
-export const auth = getAuth(app)
+// export const db = getFirestore(app);
+// export const auth = getAuth(app)
 
+export const db = (function () {
+  var database;
+  var auth;
+  function create() {
+      // Initialize Firebase
+      database = getFirestore(app);
+  }
+  function createAuth() {
+      auth = getAuth(app);
+  }
+  return {
+      getDB: function () {
+          if (!database) create();
+
+          return database;
+      },
+      getAuth: function () {
+          if (!auth) createAuth();
+
+          return auth;
+      },
+  };
+})();
+
+export const auth = (function () {
+  var auth;
+  function createAuth() {
+      auth = getAuth(app);
+  }
+  return {
+      getAuth: function () {
+          if (!auth) createAuth();
+
+          return auth;
+      },
+  };
+})();

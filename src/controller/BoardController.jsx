@@ -14,23 +14,25 @@ export const useBoards = (userId, workspace, updater) => {
             try {
                 const boardRef = []
                 if (workspace != null) {
+                   
                     workspace.boards.forEach(doc => {
                         boardRef.push(doc.id)
+                        // console.log(doc.id)
                     });
                 }
                 if (boardRef.length <= 0) {
                     setBoards(boardRef)
                     return
                 } 
-                const docRef = doc(db,'users',userId)
+                const docRef = doc(db.getDB(),'users',userId)
                 // , where('uid','in',boardRef)
-                const q = query(collection(db, "boards"), where('admins', "array-contains", docRef))
+                const q = query(collection(db.getDB(), "boards"), where('admins', "array-contains", docRef))
                 const querySnapshot = await getDocs(q)
 
                 if (querySnapshot) {
                     const documents = []
                     querySnapshot.forEach(element => {
-                        if (boardRef.indexOf(element.id) != null) {
+                        if (boardRef.indexOf(element.id) != -1) {
                             documents.push({
                                 ...element.data()
                             })
@@ -46,7 +48,7 @@ export const useBoards = (userId, workspace, updater) => {
         }
         loadQuery()
     }, [updater])
-    // console.log(updater)
+    // console.log(boards)
     return boards;
 }
 
@@ -63,7 +65,7 @@ export const addNewBoard = async (e) => {
     const workSpaceId = e.target.elements.workSpaceId.value
     const userId = e.target.elements.userId.value
 
-    const boardRef = await addDoc(collection(db, "boards"), {
+    const boardRef = await addDoc(collection(db.getDB(), "boards"), {
         title: title,
         datecreated: Timestamp.now(),
         admins: [],
@@ -79,13 +81,20 @@ export const addNewBoard = async (e) => {
 }
 
 export const closeBoard = async (boardId, workSpaceId) => {
+    console.log("Closing")
+    const boardRef = doc(db.getDB(), 'boards', boardId)
 
+    await removeBoard(workSpaceId,boardRef)
+    await updateDoc(boardRef, {
+        closed: true
+    })
+    return ""
 }
 
 // delete permanent
 export const deleteBoard = async (boardId, workSpaceId) => {
     console.log("Deleting")
-    const boardRef = doc(db, 'boards', boardId)
+    const boardRef = doc(db.getDB(), 'boards', boardId)
 
     await removeBoard(workSpaceId,boardRef)
     await deleteDoc(boardRef)
@@ -97,7 +106,7 @@ export const useBoardById = (boardId) => {
     
     useEffect(() => {
         const loadAsync = async () => {
-            const docRef = doc(db, 'boards', boardId)
+            const docRef = doc(db.getDB(), 'boards', boardId)
             const docSnap = await getDoc(docRef)
             
             if (docSnap.exists()) {
@@ -110,8 +119,8 @@ export const useBoardById = (boardId) => {
 }
 
 export const addAdminBoard = async (boardId, userId) => {
-    const docRef = doc(db,'users',userId)
-    const boardRef = doc(db,'boards',boardId)
+    const docRef = doc(db.getDB(),'users',userId)
+    const boardRef = doc(db.getDB(),'boards',boardId)
     await updateDoc(boardRef, {
         uid: boardRef.id,
         admins: arrayUnion(docRef)
