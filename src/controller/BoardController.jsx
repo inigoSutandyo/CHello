@@ -91,6 +91,32 @@ export const closeBoard = async (boardId, workSpaceId) => {
     return ""
 }
 
+export const userLeaveBoard = async (userId, boardId, workspaceId, membership) => {
+    console.log("Leaving Board");
+
+    const boardRef = await removeUser(userId, boardId, membership)
+    const boardSnap = await getDoc(boardRef)
+    if (boardSnap.exists()) {
+        if (boardSnap.data().admins.length === 0 && boardSnap.data().members.length === 0 ) {
+            deleteBoard(boardId,workspaceId)
+        }
+    }
+}
+
+const removeUser = async (userId, boardId, membership) => {
+    const userRef = doc(db.getDB(), 'users', userId)
+    
+    if (membership == "mebmer") {
+        return await updateDoc(doc(db.getDB(), 'boards', boardId), {
+            members: arrayRemove(userRef)
+        })
+    } else {
+        return await updateDoc(doc(db.getDB(), 'boards', boardId), {
+            admins: arrayRemove(userRef)
+        })
+    }
+}
+
 // delete permanent
 export const deleteBoard = async (boardId, workSpaceId) => {
     console.log("Deleting")

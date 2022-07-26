@@ -11,6 +11,7 @@ import {
 } from "../../../controller/KanbanController";
 import { CardModalComponent } from "../../components/cards/CardModalComponent";
 import { CommentModalComponent } from "../../components/cards/CommentModalComponent";
+import { LabelModalComponent } from "../../components/cards/LabelModalComponent";
 import { KanbanListComponent } from "../../components/lists/KanbanListComponent";
 import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";
@@ -64,9 +65,13 @@ export const KanbanPage = ({ userId }) => {
                 setCardUpdater={setCardUpdater}
                 userId = {userId}
                 setModalTitle = {setModalTitle}
+                listUpdater={listUpdater}
+                setListUpdater={setListUpdater}
               />
               : modalTitle == "Comments" ?
               <CommentModalComponent card={card} boardId={boardId} setModalTitle={setModalTitle}/>
+              : modalTitle == "Label" ?
+              <LabelModalComponent card={card} boardId={boardId} setModalTitle={setModalTitle}/> 
               : <div></div>
             }
           </ModalComponent>

@@ -54,7 +54,13 @@ function createWindow() {
   // ])
 }
 
-app.whenReady().then(createWindow);
+// app.whenReady().then(() => {
+//   globalShortcut.register('Alt+CommandOrControl+I', () => {
+//     console.log('Electron loves global shortcuts!')
+//   })
+// }).then(createWindow)
+
+app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

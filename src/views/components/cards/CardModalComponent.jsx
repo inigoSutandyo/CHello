@@ -1,16 +1,22 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import {
   addCardComment,
   addCheckList,
+  changeChecked,
+  changeLabel,
   removeCheckList,
   updateDescription,
   updateTitle,
   useCardComment,
+  useCardLabel,
   useCheckList,
+  useLabels,
 } from "../../../controller/CardController";
 import { CheckListComponent } from "./CheckListComponent";
 import {IoSend} from "react-icons/io5"
 import parse from "html-react-parser";
+import { LabelOptionComponent } from "./LabelOptionComponent";
+import ProgressBar from "@ramonak/react-progress-bar";
 
 export const CardModalComponent = ({
   card,
@@ -19,24 +25,55 @@ export const CardModalComponent = ({
   cardUpdater,
   setCardUpdater,
   userId,
-  setModalTitle
+  setModalTitle,
+  listUpdater,
+  setListUpdater,
 }) => {
-  const checklist = useCheckList(card, boardId);
+  
+  const [checkUpdater, setCheckUpdater] = useState(0)
+
+  const {checklist, progress} = useCheckList(card, boardId, checkUpdater);
+  const labels = useLabels(boardId, cardUpdater)
+  const label = useCardLabel(labels, card)
 
   const checkListHandler = (e) => {
     if (e.key == "Enter") {
       // console.log(e.target.value)
       addCheckList(card.uid, boardId, e.target.value).then(() => {
+        console.log("checklist added")
         setCardUpdater(cardUpdater + 1);
+        setCheckUpdater(checkUpdater+1)
       });
     }
   };
 
-  const removeCheckHandler = (cardId, boardId, listId) => {
-    removeCheckList(cardId, boardId, listId).then(() => {
+  const removeCheckHandler = (checkId) => {
+    removeCheckList(card.uid, boardId, checkId).then(() => {
       setCardUpdater(cardUpdater + 1);
+      setCheckUpdater(checkUpdater+1)
     });
   };
+
+  const handleCheckListChange = (checkId, checked) => {
+    // console.log(checked)
+    changeChecked(card.uid, boardId, checkId, checked).then(() => {
+      setCheckUpdater(checkUpdater+1)
+    })
+  }
+
+  const handleLabelChange = (selected) => {
+    if (selected == "-1") {
+      return
+    } else {
+      changeLabel(card.uid, selected, boardId).then(() => {
+        console.log("updated label")
+        setListUpdater(listUpdater+1);
+        // setCardUpdater(cardUpdater+1)
+      })
+    }
+  }
+
+  
 
   return (
     <div className="m-3">
@@ -65,7 +102,7 @@ export const CardModalComponent = ({
           id="desc-div"
           onBlur={() => {
             const innerHtml = document.getElementById("desc-div").innerHTML
-            console.log(innerHtml)
+            // console.log(innerHtml)
             updateDescription(innerHtml, card.uid, boardId).then(() => {
               setCardUpdater(cardUpdater + 1);
             });
@@ -74,30 +111,49 @@ export const CardModalComponent = ({
         >
           {parse(card.description)}
         </div>
-        {/* <input
-          type="text"
-          className="form-control"
-          id="description"
-          defaultValue={card.description}
-          onKeyDown={(e) => {
-            if (e.key == "Enter") {
-              updateDescription(e.target.value, card.uid, boardId).then(() => {
-                setCardUpdater(cardUpdater + 1);
-              });
-            }
-          }}
-        /> */}
-        <label htmlFor="floatingPassword">Description</label>
+        <label htmlFor="desc-div">Description</label>
       </div>
 
+      <div className="mb-5">
+        <input type="button" className="btn btn-outline-dark mb-3" value="Create New Label" onClick={() => {
+          setModalTitle("Label")
+        }}/>
+        {card.label ?  (
+          label ? (
+            <select className="form-select" id="label-select" aria-label="Choose Label" defaultValue={label.uid} onChange={() => {
+              const selected = document.getElementById('label-select').value
+              handleLabelChange(selected)            
+            }}>
+              <option value="-1">-- Choose Label --</option>
+              {labels?.map(l => 
+                <LabelOptionComponent label={l} key={l.uid}/>
+              )}
+            </select>
+          ) : <div>Fetching Labels...</div>
+        ) : (
+          <select className="form-select" id="label-select" aria-label="Choose Label" defaultValue={"-1"} onChange={() => {
+            const selected = document.getElementById('label-select').value
+            handleLabelChange(selected) 
+          }}>
+            <option value="-1">-- Choose Label --</option>
+            {labels?.map(l => 
+              <LabelOptionComponent label={l} key={l.uid}/>
+            )}
+          </select>
+        )}
+      </div>
       <div className="mb-3">
-        <label>Check List</label>
+        <label className="mb-1">Check List</label>
+        {checklist && checklist.length !== 0 ? (
+          <>
+            <ProgressBar completed={progress/checklist.length * 100} className="mb-1"/>
+          </>
+        ) : <></>}
         <CheckListComponent
           checklist={checklist}
           checkListHandler={checkListHandler}
-          cardId={card.uid}
-          boardId={boardId}
           removeCheckHandler = {removeCheckHandler}
+          handleChange = {handleCheckListChange}
         />
       </div>
 

@@ -92,16 +92,19 @@ export const addCheckList = async (cardId, boardId, content) => {
     
 }
 
-export const removeCheckList = async (cardId, boardId, listId) => {
-    const checkRef = doc(db,`boards/${boardId}/cards/${cardId}/checklists`, listId)
+export const removeCheckList = async (cardId, boardId, checkId) => {
+    if (!cardId || !boardId || !checkId) {
+        return
+    }
+    const checkRef = doc(db.getDB(),`boards/${boardId}/cards/${cardId}/checklists`, checkId)
     
     await deleteDoc(checkRef)
 }
 
-export const useCheckList = (card, boardId) => {
+export const useCheckList = (card, boardId, checkUpdater) => {
     const [checklist, setChecklist] = useState(null)
-    
-    
+    const [progress, setProgress] = useState(0)
+
     useEffect(() => {
         if (!card ) {
             return
@@ -127,10 +130,31 @@ export const useCheckList = (card, boardId) => {
             }
         }
         loadData()
-    }, [card])
-    // console.log(checklist)
-    return checklist
+    }, [checkUpdater])
+
+    useEffect(() => {
+        if (!checklist) {
+            return
+        }
+        let prog = 0
+        checklist.forEach(c => {
+            if (c.isChecked) {
+                prog++
+                // console.log(prog)
+            }
+        });
+        setProgress(prog)
+    }, [checklist])
+
+    return {checklist: checklist, progress: progress}
 }
+
+export const changeChecked = async (cardId, boardId, checkId, checked) => {
+    await updateDoc(doc(db.getDB(),`boards/${boardId}/cards/${cardId}/checklists`, checkId), {
+        isChecked : checked
+    })
+}
+
 export const useCardComment = (cardId, boardId) => {
     const [comments, setComments] = useState([])
 
@@ -186,14 +210,100 @@ export const addCardComment = async (cardId, boardId, userId, content) => {
     })
 }
 
-export const addLabel = async (cardId, boardId, lblname, color) => {
-    if (!lblname.trim()) return
+export const useLabels = (boardId, cardUpdater) => {
+    const [labels, setLabels] = useState(null)
 
-    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+    useEffect(() => {
+      if (!boardId) return
+      const labelList = []
+      const loadData = async () => {
+          try {
+            const labelSnapshot = await getDocs(collection(db.getDB(), `/boards/${boardId}/labels`))
+            // console.log(labelSnapshot)
+            if (labelSnapshot) {
+                labelSnapshot.forEach((doc) => {
+                    labelList.push({
+                        ref: doc.ref,
+                        uid: doc.id,
+                        ...doc.data()
+                    })
+                })
+                setLabels(labelList)
+            }
+          } catch (error) {
+            // console.log(error)
+          }
+      }
+      loadData()
+    }, [cardUpdater])
+    return labels
+}
 
-    await addDoc(collection(db.getDB(), `boards/${boardId}/labels`), {
-        name: lblname,
-        card: cardRef,
-        color: color
+export const useCardLabel = (labels, card) => {
+    const [label, setLabel] = useState(null)
+    useEffect(() => {
+        if (!card || !labels || !card.label) {
+            return 
+        }
+        labels.forEach(label => {
+            // console.log(card.label.id, label.ref.id)
+            if (card.label.id == label.ref.id) {
+                // console.log(card.title, label.name)
+                setLabel(label)
+                return label
+            }
+        });
+    }, [labels])
+    return label
+}
+
+export const addLabel = async (e) => {
+    e.preventDefault()
+    const lblname = e.target.elements.labelName.value
+    const boardId = e.target.elements.boardId.value
+    const cardId = e.target.elements.cardId.value
+    const color = e.target.elements.color.value
+
+    if (!lblname.trim()) return "Label cannot be empty"
+
+    const q = query(collection(db.getDB(), `boards/${boardId}/labels`), where('color', '==', color))
+    let flag = false;
+    try {
+        const querySnapshot = await getDocs(q)
+        if (querySnapshot) {
+            querySnapshot.forEach((doc) => {
+                // console.log(doc.data().color, color)
+                if (doc.data().color == color) {
+                    // return "Color already picked"
+                    flag = true
+                }
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+    
+    if (flag) {
+        return "Color already picked"
+    } else {
+        const docRef = await addDoc(collection(db.getDB(), `boards/${boardId}/labels`), {
+            name: lblname,
+            color: color
+        })
+        await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`,cardId), {
+            label: docRef
+        })
+        return ""
+    }
+}
+
+export const changeLabel = async (cardId, labelId, boardId) => {
+    if (!cardId || !labelId) {
+        return
+    }
+
+    const labelRef = doc(db.getDB(), `boards/${boardId}/labels`, labelId)
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
+        label: labelRef
     })
 }

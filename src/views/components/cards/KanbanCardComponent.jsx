@@ -1,11 +1,14 @@
 import React from 'react'
 import { useState } from 'react'
-import { useCards } from '../../../controller/CardController'
+import { useCards, useLabels } from '../../../controller/CardController'
 import parse from "html-react-parser";
+import { CardLabelComponent } from './CardLabelComponent';
 
 export const KanbanCardComponent = ({kanban, board, setIsModal, setCard, setKanban, cardUpdater, setModalTitle}) => {
   const cards = useCards(kanban.uid, board, cardUpdater)
+  const labels = useLabels(board.uid)
   
+
   return (
     <div>
         {cards == null || cards.length === 0 ? <p>Empty</p> : (
@@ -19,7 +22,8 @@ export const KanbanCardComponent = ({kanban, board, setIsModal, setCard, setKanb
                             </label>
                         </div> */}
                         <h6 className="card-title text-muted">{c.title}</h6>
-                        <p className="text-muted">{parse(c.description)}</p>
+                        <CardLabelComponent card={c} labels={labels}/>
+                        <div className="text-muted">{parse(c.description)}</div>
                         
                         <a className="btn btn-outline-primary btn-sm" onClick={()=>{
                             setIsModal(true)
