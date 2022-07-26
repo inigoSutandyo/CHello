@@ -244,11 +244,87 @@ export const addAdmin = async (e) => {
   window.location.reload();
 };
 
+export const changeMembership = async (userId, workspaceId) => {
+  const userRef = doc(db.getDB(), "users", userId)
+  const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
+  const workspaceSnap = await getDoc(workspaceRef)
+  if (workspaceSnap.exists()) {
+    const data =workspaceSnap.data()
+    // if (data.members[0] == userRef) {
+    //   console.log("found")
+    // }
+    // console.log(data.members[0])
+    // console.log(userRef)
+
+    const isAdmin = data.admins.find((admin) => {
+      return admin.id === userRef.id
+    })
+    const isMember = data.members.find((member) => {
+      return member.id === userRef.id
+    })
+    // console.log(isAdmin)
+    if (isAdmin) {
+      toMember(userRef, workspaceRef)
+    } else if (isMember) {
+      toAdmin(userRef, workspaceRef)
+    }
+  }
+}
+
+const toMember = async (userRef, workspaceRef) => {
+  await updateDoc(workspaceRef, {
+    admins: arrayRemove(userRef),
+    members: arrayUnion(userRef)
+  })
+}
+
+const toAdmin = async (userRef, workspaceRef) => {
+  await updateDoc(workspaceRef, {
+    admins: arrayUnion(userRef),
+    members: arrayRemove(userRef)
+  })
+} 
+
+export const removeUserWorkspace = async (userId, workspaceId) => {
+  const userRef = doc(db.getDB(), "users", userId)
+  const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
+  const workspaceSnap = await getDoc(workspaceRef)
+  if (workspaceSnap.exists()) {
+    const data =workspaceSnap.data()
+
+    const isAdmin = data.admins.find((admin) => {
+      return admin.id === userRef.id
+    })
+    const isMember = data.members.find((member) => {
+      return member.id === userRef.id
+    })
+    // console.log(isAdmin)
+    if (isAdmin) {
+      removeAdmin(userRef, workspaceRef)
+    } else if (isMember) {
+      removeMember(userRef, workspaceRef)
+    }
+  }
+}
+
+const removeAdmin = async (userRef, workspaceRef) => {
+  await updateDoc(workspaceRef, {
+    admins: arrayRemove(userRef),
+  })
+}
+
+const removeMember = async (userRef, workspaceRef) => {
+  await updateDoc(workspaceRef, {
+    members: arrayRemove(userRef)
+  })
+} 
+
 export const addBoard = async (workspaceId, boardRef) => {
   const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
   await updateDoc(workspaceRef, {
       boards: arrayUnion(boardRef)
   })
+
 }
 
 export const removeBoard = async (workspaceId, boardRef) => {

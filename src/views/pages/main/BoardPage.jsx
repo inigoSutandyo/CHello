@@ -5,7 +5,11 @@ import {
   deleteBoard,
   useBoards,
 } from "../../../controller/BoardController";
-import { useWorkspaceById } from "../../../controller/WorkspaceController";
+import {
+  changeMembership,
+  removeUserWorkspace,
+  useWorkspaceById,
+} from "../../../controller/WorkspaceController";
 import { BoardListComponent } from "../../components/boards/BoardListComponent";
 import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";
@@ -20,58 +24,84 @@ export const BoardPage = ({ userId }) => {
 
   const workspace = useWorkspaceById(workspaceId, workspaceUpdater);
   // console.log(workspace.uid)
-  useEffect(()=> {
-    const intervalId = setInterval(()=> {
-      setWorkspaceUpdater(workspaceUpdater+1);
-    }, 2500)
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setWorkspaceUpdater(workspaceUpdater + 1);
+    }, 2500);
 
     return () => clearInterval(intervalId);
-  }, [workspace])
+  }, [workspace]);
 
   useEffect(() => {
     setSessionUser(userId);
   }, [userId]);
-  
-  useEffect(()=> {
-    setUpdater(updater+1)
-  }, [workspace])
-  
+
+  useEffect(() => {
+    setUpdater(updater + 1);
+  }, [workspace]);
+
   const boards = useBoards(sessionUser, workspace, updater);
   const [isModal, setIsModal] = useState(false);
+  const [modalTitle, setModalTitle] = useState();
+
+  const handleMembershipChange = (userId) => {
+    changeMembership(userId, workspaceId).then(() => {
+      console.log(userId);
+      setWorkspaceUpdater(workspaceUpdater + 1);
+    });
+  };
+
+  const handleUserRemoval = (userId) => {
+    removeUserWorkspace(userId, workspaceId).then(() => {
+      console.log(userId);
+      setWorkspaceUpdater(workspaceUpdater + 1);
+    });
+  };
 
   return (
     <>
       {boards != null && workspace != null && sessionUser != null ? (
-        <div className="m-3">
+        <div className="m-3" id="board-page">
           <div className="fs-3">
             <p color="text-primary">{workspace.name}</p>
-            Boards
+            {membership != "admin" ? (
+              <div></div>
+            ) : (
+              <button
+                className="btn btn-info"
+                onClick={() => {
+                  setIsModal(true);
+                  setModalTitle("Workspace Members");
+                }}
+              >
+                Members
+              </button>
+            )}
+            <p className="text-muted">Boards</p>
           </div>
-          {membership != "admin" ? <div></div> : (
-            <button className="btn btn-info" onClick={() => setIsModal(true)}>
-              Members
-            </button>
-          )}
-          {!isModal ? (
-            <BoardListComponent
-              boards={boards}
-              sessionUser={sessionUser}
-              workSpaceId={workspaceId}
-              addNewBoard={addNewBoard}
-              deleteBoard={deleteBoard}
-              updater={updater}
-              setUpdater={setUpdater}
-              membership = {membership}
+          <BoardListComponent
+            boards={boards}
+            sessionUser={sessionUser}
+            workSpaceId={workspaceId}
+            addNewBoard={addNewBoard}
+            deleteBoard={deleteBoard}
+            updater={updater}
+            setUpdater={setUpdater}
+            membership={membership}
+          />
+          <ModalComponent
+            isModal={isModal}
+            setIsModal={setIsModal}
+            text={modalTitle}
+            appELement={"#board-page"}
+          >
+            <WorkspaceMemberComponent
+              workSpace={workspace}
+              userId={userId}
+              handleMembershipChange={handleMembershipChange}
+              handleUserRemoval = {handleUserRemoval}
             />
-          ) : (
-            <ModalComponent
-              isModal={isModal}
-              setIsModal={setIsModal}
-              text={"Workspace Members"}
-            >
-              <WorkspaceMemberComponent workSpace={workspace} userId={userId} />
-            </ModalComponent>
-          )}
+          </ModalComponent>
         </div>
       ) : (
         <LoadingComponent />

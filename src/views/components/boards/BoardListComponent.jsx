@@ -31,9 +31,9 @@ export const BoardListComponent = ({
               <div className="card-body d-flex flex-column">
                 <h4 className="card-title mb-3 text-wrap">{b.title}</h4>
                 {/* <p className="card-text">Date Created : {b.date}</p> */}
-                <div className="d-flex flex-row justify-content-between">
+                <div className="d-flex flex-row justify-content-between align-items-center">
                   <Link to={`/board/${b.uid}`}>
-                    <p className="btn btn-primary">Open</p>
+                    <div className="btn btn-primary">Open</div>
                   </Link>
                   <a
                     className="btn text-danger fs-4"
