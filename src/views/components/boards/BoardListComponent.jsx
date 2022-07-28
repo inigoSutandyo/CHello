@@ -8,7 +8,7 @@ export const BoardListComponent = ({
   board,
   membership,
   setIsModal,
-  setModalTitle
+  setModalTitle,
 }) => {
   return (
     <>

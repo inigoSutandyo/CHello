@@ -114,6 +114,30 @@ export const usePublicWorkspace = (workspaces) => {
   return publicSpace;
 }
 
+export const useWorkspaceList = () => {
+  const [workspaces, setWorkspaces] = useState()
+
+  useEffect(() => {
+    const loadData = async () => {
+      const data = []
+      const q = query(collection(db.getDB(), "workspaces"), where("visibility", '==', 'public'))
+      const querySnap = await getDocs(q)
+      if (querySnap) {
+        querySnap.forEach(doc => {
+          data.push({
+            ...doc.data(),
+            uid: doc.id,
+            ref: doc.ref
+          })
+        });
+      }
+      setWorkspaces(data)
+    }
+    loadData()
+  }, [])
+  return workspaces
+}
+
 export const useWorkspaceById = (workspaceId, userId, updater) => {
   const [workspace, setWorkspace] = useState(null);
 
@@ -192,7 +216,8 @@ export const addNewWorkspace = async (e) => {
 };
 
 export const deleteWorkspace = async (workspaceId) => {
-  await deleteDoc(doc(db.getDB(), 'workspace', workspaceId))
+  console.log("deleting")
+  await deleteDoc(doc(db.getDB(), 'workspaces', workspaceId))
 }
 
 export const useWorkspaceUsers = (workSpace) => {

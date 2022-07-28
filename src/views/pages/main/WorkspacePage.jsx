@@ -16,8 +16,6 @@ export const WorkspacePage = ({ userId }) => {
   useEffect(() => {
     setSessionUser(userId);
     setUpdater(updater + 1);
-    // console.log("userId in");
-    // console.log(workspaces);
   }, [userId]);
 
   const workspaces = useWorkspace(sessionUser, updater);

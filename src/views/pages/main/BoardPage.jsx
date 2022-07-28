@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   addNewBoard,
   deleteBoard,
@@ -17,6 +17,7 @@ import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";
 import { WorkspaceMemberComponent } from "../../components/workspaces/WorkspaceMemberComponent";
 import { VscAdd } from "react-icons/vsc";
+import { FaArrowLeft } from "react-icons/fa";
 
 export const BoardPage = ({ userId }) => {
   const { workspaceId } = useParams();
@@ -26,15 +27,6 @@ export const BoardPage = ({ userId }) => {
   const [workspaceUpdater, setWorkspaceUpdater] = useState(0);
 
   const workspace = useWorkspaceById(workspaceId, userId, workspaceUpdater);
-  // console.log(workspace.uid)
-  // useEffect(() => {
-  //   const intervalId = setInterval(() => {
-  //     setWorkspaceUpdater(workspaceUpdater + 1);
-  //   }, 10000);
-
-  //   return () => clearInterval(intervalId);
-  // }, [workspace]);
-
   useEffect(() => {
     setSessionUser(userId);
     setWorkspaceUpdater(workspaceUpdater+1)
@@ -62,10 +54,20 @@ export const BoardPage = ({ userId }) => {
     });
   };
 
+  const navigate = useNavigate()
   return (
     <>
       {boards != null && workspace != null && sessionUser != null ? (
         <div className="m-3" id="board-page">
+          <div className="d-flex justify-content-start">
+            <div onClick={() => {
+              navigate(-1)
+            }} style={{
+              cursor: "pointer"
+            }}>
+              <FaArrowLeft/>
+            </div>
+          </div>
           <div className="fs-3">
             <p color="text-primary">{workspace.name}</p>
             {workspace.curr_membership === "admin" ? (
@@ -208,7 +210,7 @@ export const BoardPage = ({ userId }) => {
                 membership = {workspace.curr_membership}
               />
             ) : modalTitle === "Board Detail" ? (
-              <BoardDetailComponent isOpen={true}/>
+              <BoardDetailComponent isOpen={true} currWorkspace={workspace}/>
             ) : <div></div>}
           </ModalComponent>
         </div>
