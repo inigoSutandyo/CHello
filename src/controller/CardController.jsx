@@ -2,6 +2,7 @@ import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, ge
 import { useEffect } from "react"
 import { useState } from "react"
 import { db } from "../util/FireBaseConfig"
+import { notifyUser } from "./InviteController"
 
 
 export const useCards = (kanbanId, board, cardUpdater) => {
@@ -324,4 +325,23 @@ export const addReminderDate = async (cardId, boardId, date) => {
     await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
         reminderDate: Timestamp.fromDate(date)
     })
+}
+
+export const mentionUser = async (data, userId) => {
+    const userRef = doc(db.getDB(), "users", userId)
+    const userSnap = await getDoc(userRef)
+    const mentions = []
+    if ( userSnap.exists()) {
+        data.forEach(element => {
+            if (mentions.indexOf(element) === -1) {
+                mentions.push(element)
+            }
+        });
+        const user = userSnap.data()
+        const message = `User ${user.email} mentioned you in a comment!`
+        mentions.forEach(mention => {
+            notifyUser(mention, message)
+        });        
+    }
+
 }

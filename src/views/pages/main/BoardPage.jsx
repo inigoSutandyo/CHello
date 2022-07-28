@@ -7,6 +7,7 @@ import {
 } from "../../../controller/BoardController";
 import {
   changeMembership,
+  changeVisibility,
   joinWorkspace,
   removeUserWorkspace,
   useWorkspaceById,
@@ -84,9 +85,11 @@ export const BoardPage = ({ userId }) => {
                   </button>
                   <button
                     className="btn btn-danger mx-1"
-                    onClick={() => {
-                      setIsModal(true);
-                      setModalTitle("Leave Workspace");
+                    onClick={async () => {
+                      await removeUserWorkspace(userId,workspaceId).then(() => {
+                        setWorkspaceUpdater(workspaceUpdater+1)
+                      })
+                      navigate(-1)
                     }}
                   >
                     Leave Workspace
@@ -95,7 +98,10 @@ export const BoardPage = ({ userId }) => {
                 
                 <div className="mx-1 d-flex w-50">
                   <label htmlFor="visibility" className="me-3">Visibility: </label>
-                  <select name="visibility" className="form-control" id="visibility">
+                  <select name="visibility" className="form-control" id="visibility" defaultValue={workspace.visibility} onChange = {() => {
+                    const visibility = document.getElementById("visibility").value
+                    changeVisibility(workspaceId, visibility).then(setWorkspaceUpdater(workspaceUpdater+1))
+                  }}>
                     <option value="public">Public</option>
                     <option value="Private">Private</option>
                   </select>
@@ -115,9 +121,11 @@ export const BoardPage = ({ userId }) => {
                   </button>
                   <button
                   className="btn btn-danger mx-2"
-                  onClick={() => {
-                    setIsModal(true);
-                    setModalTitle("Leave Workspace");
+                  onClick={async () => {
+                    removeUserWorkspace(userId,workspaceId).then(() => {
+                      setWorkspaceUpdater(workspaceUpdater+1)
+                    })
+                    navigate(-1)
                   }}
                   >
                     Leave Workspace
@@ -162,11 +170,11 @@ export const BoardPage = ({ userId }) => {
                 <form
                     className="row g-2 mx-2 mt-5 p-1"
                     onSubmit={(e) => {
-                    addNewBoard(e).then(() => {
-                        console.log("update!");
-                        setUpdater(updater + 1);
-                        console.log(updater);
-                    });
+                      addNewBoard(e).then(() => {
+                          console.log("update!");
+                          setUpdater(updater + 1);
+                          console.log(updater);
+                      });
                     }}
                 >
                     <input

@@ -97,25 +97,35 @@ export const useNotification = (userId, updater) => {
     return notifications
 }
 
+export const createNotifications = async (userRef, spaceRef) => {
+    const userSnap = await getDoc(userRef)
+    const spaceSnap = await getDoc(spaceRef)
+    if (spaceSnap.exists() && userSnap.exists()) {
+        const title = spaceSnap.data().title ? spaceSnap.data().title : spaceSnap.data().name
+        const msg = `${userSnap.data().email} joined ${title}`
+        const admins = spaceSnap.data().admins
+        const members = spaceSnap.data().members
+        admins.forEach(async (admin) => {
+            if (admin.id != userRef.id) {
+                await notifyUser(admin.id, msg)
+            }
+        });
+    
+        members.forEach(async (member) => {
+            if (member.id != userRef.id) {
+                await notifyUser(member.id, msg)
+            }
+        });
+    }
+}
+
 export const acceptInvite = async (spaceRef, userRef, inviteId) => {
     // update workspace
     await updateDoc(spaceRef, {
         members: arrayUnion(userRef)
     }).then(()=>{console.log("updated")})
 
-    const userSnap = await getDoc(userRef)
-    const spaceSnap = await getDoc(spaceRef)
-    const title = spaceSnap.data().title ? spaceSnap.data().title : spaceSnap.data().name
-    const msg = `${userSnap.data().email} joined ${title}`
-    const admins = spaceSnap.data().admins
-    const members = spaceSnap.data().members
-    admins.forEach(async (admin) => {
-        await notifyUser(admin.id, msg)
-    });
-
-    members.forEach(async (member) => {
-        await notifyUser(member.id, msg)
-    });
+   
 
 
     await destroyInvite(inviteId);

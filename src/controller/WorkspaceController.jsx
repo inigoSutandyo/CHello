@@ -14,7 +14,8 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../util/FireBaseConfig";
-import { notifyUser } from "./InviteController";
+import { createNotifications, notifyUser } from "./InviteController";
+
 export const useWorkspace = (userId, updater) => {
   const [workspace, setWorkspace] = useState(null);
 
@@ -305,13 +306,7 @@ export const joinWorkspace = async (userId, workspaceId) => {
     members: arrayUnion(userRef)
   })
 
-  const docSnap = await getDoc(workspaceRef)
-  if (docSnap.exists()) {
-    const data = docSnap.data()
-    data.admins.forEach(element => {
-      notifyUser(element.id, workspaceId)
-    });
-  }
+  createNotifications(userRef, workspaceRef)
 }
 
 export const changeMembership = async (userId, workspaceId) => {
@@ -355,6 +350,19 @@ const toAdmin = async (userRef, workspaceRef) => {
   })
 } 
 
+const checkWorkspaceMembers = async (workspaceId) => {
+  const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
+  const workspaceSnap = await getDoc(workspaceRef)
+  if (workspaceSnap.exists()) {
+    const data =workspaceSnap.data()
+    if ((!data.admins || data.admins.length === 0) && (!data.members || data.members.length === 0)) {
+      console.log("test")
+      deleteWorkspace(workspaceId)
+    }
+    
+  }
+}
+
 export const removeUserWorkspace = async (userId, workspaceId) => {
   const userRef = doc(db.getDB(), "users", userId)
   const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
@@ -370,9 +378,13 @@ export const removeUserWorkspace = async (userId, workspaceId) => {
     })
     // console.log(isAdmin)
     if (isAdmin) {
-      removeAdmin(userRef, workspaceRef)
+      removeAdmin(userRef, workspaceRef).then(async ()=> {
+        await checkWorkspaceMembers(workspaceId)
+      })
     } else if (isMember) {
-      removeMember(userRef, workspaceRef)
+      removeMember(userRef, workspaceRef).then(async ()=> {
+        await checkWorkspaceMembers(workspaceId)
+      })
     }
   }
 }
@@ -401,5 +413,11 @@ export const removeBoard = async (workspaceId, boardRef) => {
   const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
   await updateDoc(workspaceRef, {
       boards: arrayRemove(boardRef)
+  })
+}
+
+export const changeVisibility = async (workspaceId, visibility) => {
+  await updateDoc(doc(db.getDB(), "workspaces", workspaceId), {
+    visibility: visibility
   })
 }

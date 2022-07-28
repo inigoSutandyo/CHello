@@ -1,7 +1,8 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth"
 import { auth, db } from "../util/FireBaseConfig"
-import { doc, setDoc } from "firebase/firestore"; 
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"; 
 import { createUser } from "../factory/UserFactory";
+import { useEffect, useState } from "react";
 
 export const registerAuth = async (email, password, confirm) => {
     // console.log(email + " " + password)
@@ -38,3 +39,32 @@ export const logoutAuth = async () => {
 }
 
 
+export const useMentions = (userId) => {
+    const [users, setUsers] = useState()
+
+    useEffect(() => {
+      const data = []
+      const loadData = async () => {
+        try {     
+            const docSnap = await getDocs(collection(db.getDB(), 'users'))
+            if (docSnap) {
+                let i = 0
+                docSnap.forEach(doc => {
+                    if (doc.id != userId) {
+                        data.push({
+                            display: doc.data().email,
+                            id: doc.id
+                        })
+                    }
+                });
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setUsers(data)
+      }
+      loadData()
+    }, [])
+    // console.log(users)
+    return users
+}

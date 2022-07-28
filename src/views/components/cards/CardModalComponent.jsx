@@ -17,6 +17,10 @@ import {IoSend} from "react-icons/io5"
 import parse from "html-react-parser";
 import { LabelOptionComponent } from "./LabelOptionComponent";
 import ProgressBar from "@ramonak/react-progress-bar";
+import { MentionsInput, Mention } from 'react-mentions'
+import { useMentions } from "../../../controller/UserController";
+import CommentComponent from "./CommentComponent";
+
 
 export const CardModalComponent = ({
   card,
@@ -35,7 +39,8 @@ export const CardModalComponent = ({
   const {checklist, progress} = useCheckList(card, boardId, checkUpdater);
   const labels = useLabels(boardId, cardUpdater)
   const label = useCardLabel(labels, card)
-
+  const users = useMentions(userId)
+  // console.log(users)
   const checkListHandler = (e) => {
     if (e.key == "Enter") {
       // console.log(e.target.value)
@@ -73,7 +78,7 @@ export const CardModalComponent = ({
     }
   }
 
-  
+
 
   return (
     <div className="m-3">
@@ -166,27 +171,24 @@ export const CardModalComponent = ({
         <label>Reminder Date</label>
         <input type="datetime-local" className="form-control" />
       </div>
+      
+      {users ? (
+        <div className="mb-3">
+          <label>Card Comment</label>
+          <div className="input-group mb-3 form-floating">
+            {/* <input type="text" className="form-control" id="comment" placeholder="Comment" aria-label="Add Comment" aria-describedby="btn-comment"/> */}
+            {/* <textarea className="form-control" placeholder="Leave a comment here" id="comment"></textarea> */}
+            <CommentComponent users={users} card = {card} userId={userId} boardId={boardId}/>
+            
+          </div>
+            <input type="button" className="btn btn-outline-secondary" value="View All Comments" onClick={() => {
+              setModalTitle("Comments")
+            }}/>
+          <div>
 
-      <div className="mb-3">
-        <label>Card Comment</label>
-        
-        <div className="input-group mb-3">
-          <input type="text" className="form-control" id="comment" placeholder="Comment" aria-label="Add Comment" aria-describedby="btn-comment"/>
-          <button className="btn btn-outline-secondary" type="button" id="btn-comment" onClick={() => {
-            const content = document.getElementById('comment').value.trim()
-            addCardComment(card.uid, boardId, userId, content)
-            document.getElementById('comment').value = ""
-          }}>
-            <IoSend/>
-          </button>
+          </div>
         </div>
-          <input type="button" className="btn btn-outline-secondary" value="View All Comments" onClick={() => {
-            setModalTitle("Comments")
-          }}/>
-        <div>
-
-        </div>
-      </div>
+      ) : <></>}
     </div>
   );
 };
