@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../util/FireBaseConfig";
-
+import { notifyUser } from "./InviteController";
 export const useWorkspace = (userId, updater) => {
   const [workspace, setWorkspace] = useState(null);
 
@@ -114,16 +114,44 @@ export const usePublicWorkspace = (workspaces) => {
   return publicSpace;
 }
 
-export const useWorkspaceById = (workspaceId, updater) => {
+export const useWorkspaceById = (workspaceId, userId, updater) => {
   const [workspace, setWorkspace] = useState(null);
 
   useEffect(() => {
+    if (!workspaceId || !userId) return
+    
     const loadAsync = async () => {
+      const userRef = doc(db.getDB(), 'users', userId)
       const docRef = doc(db.getDB(), "workspaces", workspaceId);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
-        setWorkspace(docSnap.data());
+        const data = docSnap.data()
+
+        const isAdmin = data.admins.find((admin) => {
+          return admin.id === userRef.id
+        })
+        const isMember = data.members.find((member) => {
+          return member.id === userRef.id
+        })
+        
+        if (isAdmin) {
+          setWorkspace({
+            curr_membership: "admin",
+            ...docSnap.data()
+          });
+        } else if (isMember) {
+          setWorkspace({
+            curr_membership: "member",
+            ...docSnap.data()
+          });
+        } else {
+          setWorkspace({
+            curr_membership: "none",
+            ...docSnap.data()
+          });
+        }
+
+        
       }
     };
     loadAsync();
@@ -244,12 +272,29 @@ export const addAdmin = async (e) => {
   window.location.reload();
 };
 
+export const joinWorkspace = async (userId, workspaceId) => {
+  const userRef = doc(db.getDB(), "users", userId)
+  const workspaceRef = doc(db.getDB(), 'workspaces', workspaceId)
+
+  await updateDoc(workspaceRef, {
+    members: arrayUnion(userRef)
+  })
+
+  const docSnap = await getDoc(workspaceRef)
+  if (docSnap.exists()) {
+    const data = docSnap.data()
+    data.admins.forEach(element => {
+      notifyUser(element.id, workspaceId)
+    });
+  }
+}
+
 export const changeMembership = async (userId, workspaceId) => {
   const userRef = doc(db.getDB(), "users", userId)
   const workspaceRef = doc(db.getDB(), "workspaces", workspaceId)
   const workspaceSnap = await getDoc(workspaceRef)
   if (workspaceSnap.exists()) {
-    const data =workspaceSnap.data()
+    const data = workspaceSnap.data()
     // if (data.members[0] == userRef) {
     //   console.log("found")
     // }

@@ -1,92 +1,43 @@
-import { VscAdd } from "react-icons/vsc";
+
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaEdit } from "react-icons/fa";
 import { LoadingComponent } from "../LoadingComponent";
 
 export const BoardListComponent = ({
-  boards,
-  sessionUser,
-  workSpaceId,
-  addNewBoard,
-  deleteBoard,
-  updater,
-  setUpdater,
+  board,
   membership,
+  setIsModal,
+  setModalTitle
 }) => {
   return (
     <>
-      <div className="mx-2 mt-5 d-flex flex-wrap">
-        {boards.length === 0 ? (
-          <h1 className="fs-2 fw-bold">
-            No Boards created yet. Why don't you go ahead and create one?
-          </h1>
-        ) : (
-          boards.map((b) => (
-            <div
-              className="card me-5 mb-3 text-bg-dark p-3"
-              key={b.uid}
-              style={{ width: "20%" }}
-            >
-              <div className="card-body d-flex flex-column">
-                <h4 className="card-title mb-3 text-wrap">{b.title}</h4>
-                {/* <p className="card-text">Date Created : {b.date}</p> */}
-                <div className="d-flex flex-row justify-content-between align-items-center">
-                  <Link to={`/board/${b.uid}`}>
-                    <div className="btn btn-primary">Open</div>
-                  </Link>
-                  <a
-                    className="btn text-danger fs-4"
-                    onClick={() => {
-                      deleteBoard(b.uid, workSpaceId).then(() => {
-                        setUpdater(updater + 1);
-                      });
-                    }}
-                  >
-                    <FaTrashAlt />
-                  </a>
-                </div>
-              </div>
+      <div
+        className="card me-5 mb-3 text-bg-dark p-1"
+        key={board.uid}
+        style={{ width: "20%" }}
+      >
+        <div className="card-body d-flex flex-column">
+          <h4 className="card-title mb-3 text-wrap">{board.title}</h4>
+          {board.visibility === "public" || membership === "admin" || board.curr_membership !== "none"? (
+            <div className="d-flex flex-row justify-content-between align-items-center">
+              <Link to={`/board/${board.uid}`} className="me-2">
+                <div className="btn btn-primary">Open</div>
+              </Link>
+              {board.curr_membership === "admin" ? (
+                <a
+                  className="btn text-warning fs-4"
+                  onClick={() => {
+                    setIsModal(true)
+                    setModalTitle("Board Detail")
+                  }}
+                >
+                  <FaEdit />
+                </a>
+              ) : <></>}
             </div>
-          ))
-        )}
-      </div>
-      <div>
-        {membership != "admin" ? <div></div> : (
-            <form
-                className="row g-2 mx-2 mt-5 p-1"
-                onSubmit={(e) => {
-                addNewBoard(e).then(() => {
-                    console.log("update!");
-                    setUpdater(updater + 1);
-                    console.log(updater);
-                });
-                }}
-            >
-                <input
-                    type="hidden"
-                    name="workSpaceId"
-                    id="workSpaceId"
-                    value={workSpaceId}
-                />
-                <input type="hidden" name="userId" id="userId" value={sessionUser} />
-                <div className="col-auto">
-                <input
-                    required
-                    type="text"
-                    className="form-control"
-                    name="boardTitle"
-                    id="boardTitle"
-                    placeholder="Add Board"
-                />
-                </div>
-                <div className="col-auto">
-                <button type="submit" className="btn btn-primary mb-3 px-2 py-1">
-                    <VscAdd />
-                </button>
-                </div>
-            </form>
-        )}
+          ) : <div></div>}
+        </div>
       </div>
     </>
   );

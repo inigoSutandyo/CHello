@@ -3,23 +3,16 @@ import React from "react";
 import { inviteUser } from "../../../controller/InviteController";
 import { useWorkspaceUsers } from "../../../controller/WorkspaceController";
 import { VscAdd } from "react-icons/vsc";
-import { FaWindowClose } from "react-icons/fa";
-import { IconContext } from "react-icons/lib";
+import { MemberComponent } from "../MemberComponent";
 
 export const WorkspaceMemberComponent = ({
   workSpace,
   userId,
   handleMembershipChange,
   handleUserRemoval,
+  membership,
 }) => {
   const { admins, members } = useWorkspaceUsers(workSpace);
-
-  //   if (users.length != 0) {
-  //     console.log(users)
-  //   } else {
-  //     console.log("Empty = ")
-  //     console.log(users)
-  //   }
 
   return (
     <div className="m-2">
@@ -30,25 +23,14 @@ export const WorkspaceMemberComponent = ({
         <div className="mb-5 d-flex flex-column">
           {admins.map((u) => (
             <div key={u.uid}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>{u.email}</div>
-                <div className="d-flex">
-                  <button
-                    type="button"
-                    className="btn btn-success me-3"
-                    onClick={() => handleMembershipChange(u.uid)}
-                  >
-                    To Member
-                  </button>
-                  <div style={{ cursor: "pointer" }} onClick={() => handleUserRemoval(u.uid)}>
-                    <IconContext.Provider
-                      value={{ color: "red", size: "30px" }}
-                    >
-                      <FaWindowClose />
-                    </IconContext.Provider>
-                  </div>
-                </div>
-              </div>
+              <MemberComponent
+                user={u}
+                membership={membership}
+                handleMembershipChange={handleMembershipChange}
+                handleUserRemoval={handleUserRemoval}
+                buttonText={"To Member"}
+                currentId = {userId}
+              />
               <hr
                 style={{
                   width: "100%",
@@ -66,25 +48,14 @@ export const WorkspaceMemberComponent = ({
           <h5>Members</h5>
           {members.map((u) => (
             <div key={u.uid}>
-              <div className="d-flex justify-content-between align-items-center">
-                <div>{u.email}</div>
-                <div className="d-flex">
-                  <button
-                    type="button"
-                    className="btn btn-warning me-3"
-                    onClick={() => handleMembershipChange(u.uid)}
-                  >
-                    To Admin
-                  </button>
-                  <div style={{ cursor: "pointer" }} onClick={() => handleUserRemoval(u.uid)}>
-                    <IconContext.Provider
-                      value={{ color: "red", size: "30px" }}
-                    >
-                      <FaWindowClose />
-                    </IconContext.Provider>
-                  </div>
-                </div>
-              </div>
+              <MemberComponent
+                user={u}
+                membership={membership}
+                handleMembershipChange={handleMembershipChange}
+                handleUserRemoval={handleUserRemoval}
+                buttonText={"To Admin"}
+                currentId = {userId}
+              />
               <hr
                 style={{
                   width: "100%",

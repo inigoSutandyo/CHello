@@ -307,3 +307,21 @@ export const changeLabel = async (cardId, labelId, boardId) => {
         label: labelRef
     })
 }
+
+export const addDueDate = async (cardId, boardId, date) => {
+    if (!cardId || !boardId || !date) {
+        return
+    }
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
+        dueDate: Timestamp.fromDate(date)
+    })
+}
+
+export const addReminderDate = async (cardId, boardId, date) => {
+    if (!cardId || !boardId || !date) {
+        return
+    }
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
+        reminderDate: Timestamp.fromDate(date)
+    })
+}

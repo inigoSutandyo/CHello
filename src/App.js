@@ -45,7 +45,7 @@ function App() {
       <Routes>
         <Route path='/' element={<GuestPage/>} />
         <Route path='/workspace' element={userSession!=null && <WorkspacePage userId={userSession.uid}/>} />
-        <Route path='/workspace/:workspaceId/:membership' element={userSession!=null && <BoardPage userId={userSession.uid}/>} />
+        <Route path='/workspace/:workspaceId' element={userSession!=null && <BoardPage userId={userSession.uid}/>} />
         <Route path='/board/:boardId' element={userSession!=null && <KanbanPage userId={userSession.uid}/>} />
         <Route path='/invitations' element={userSession!=null && <NotificationPage userId={userSession.uid}/>} />
         <Route path='/login' element={<Login/>} />

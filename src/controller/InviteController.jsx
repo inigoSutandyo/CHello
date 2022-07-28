@@ -33,6 +33,14 @@ export const inviteUser = async (sourceId, memberEmail, spaceId, spaceType, memb
     // window.location.reload();
 }
 
+export const notifyUser = async (userId, message) => {
+    const userRef = doc(db.getDB(), "users", userId);
+    await addDoc(collection(db.getDB(), 'notifications'), {
+        target: userRef,
+        message: message
+    })
+}
+
 export const useInvite = (userId, updater) => {
     const [invites, setInvites] = useState([])
 
@@ -54,22 +62,71 @@ export const useInvite = (userId, updater) => {
       }
       loadData();
     }, [updater])
-    
+    console.log(invites)
     return invites
 }
   
-export const acceptInvite = async (spaceRef, userRef, inviteId, memberType) => {
-    // update workspace
-    if (memberType == "member" ) {
-        await updateDoc(spaceRef, {
-            members: arrayUnion(userRef)
-        })
-    }
-        
+export const useNotification = (userId, updater) => {
+    const [notifications, setNotifications] = useState()
+    useEffect(() => {
+      if (!userId) return
 
-    destroyInvite(inviteId);
+      const notifList = []
+      const loadData = async () => {
+        const userRef = doc(db.getDB(), "users", userId);
+        try {
+            const q = query(collection(db.getDB(), 'notifications'));
+            const querySnapshot = await getDocs(q);
+            // console.log(userRef)
+            querySnapshot.forEach((doc) => {
+                if (userRef.id == doc.data().target.id) {
+                    notifList.push({
+                        uid: doc.id,
+                        ...doc.data()
+                    })
+                }
+            });
+        } catch (error) {
+            
+        }
+        
+        setNotifications(notifList)
+      }
+      loadData()
+    }, [updater])
+    return notifications
+}
+
+export const acceptInvite = async (spaceRef, userRef, inviteId) => {
+    // update workspace
+    await updateDoc(spaceRef, {
+        members: arrayUnion(userRef)
+    }).then(()=>{console.log("updated")})
+
+    const userSnap = await getDoc(userRef)
+    const spaceSnap = await getDoc(spaceRef)
+    const title = spaceSnap.data().title ? spaceSnap.data().title : spaceSnap.data().name
+    const msg = `${userSnap.data().email} joined ${title}`
+    const admins = spaceSnap.data().admins
+    const members = spaceSnap.data().members
+    admins.forEach(async (admin) => {
+        await notifyUser(admin.id, msg)
+    });
+
+    members.forEach(async (member) => {
+        await notifyUser(member.id, msg)
+    });
+
+
+    await destroyInvite(inviteId);
+    console.log("done")
 }
 
 export const destroyInvite = async (inviteId) => {
     await(deleteDoc(doc(db.getDB(),'invitations',inviteId)));
+}
+
+export const destroyNotification = async (notifId) => {
+    console.log("deleting")
+    await(deleteDoc(doc(db.getDB(),'notifications',notifId)));
 }

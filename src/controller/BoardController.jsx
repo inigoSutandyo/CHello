@@ -4,6 +4,18 @@ import { db } from "../util/FireBaseConfig"
 import { addTemplateList } from "./KanbanController"
 import { addBoard, removeBoard } from "./WorkspaceController"
 
+
+const checkMembership = (data, userRef) => {
+    const isAdmin = data.admins.find((admin) => {
+        return admin.id === userRef.id
+    })
+    const isMember = data.members.find((member) => {
+        return member.id === userRef.id
+    })
+
+    return isAdmin ? "admin" : isMember ? "member" : "none"
+}
+
 export const useBoards = (userId, workspace, updater) => {
     const [boards, setBoards] = useState(null)
     useEffect(() => {
@@ -26,19 +38,22 @@ export const useBoards = (userId, workspace, updater) => {
                 } 
                 const docRef = doc(db.getDB(),'users',userId)
                 // , where('uid','in',boardRef)
-                const q = query(collection(db.getDB(), "boards"), where('admins', "array-contains", docRef))
+                const q = query(collection(db.getDB(), "boards"))
                 const querySnapshot = await getDocs(q)
 
                 if (querySnapshot) {
                     const documents = []
                     querySnapshot.forEach(element => {
+                        const member = checkMembership(element.data(),docRef)
                         if (boardRef.indexOf(element.id) != -1) {
                             documents.push({
-                                ...element.data()
+                                ...element.data(),
+                                curr_membership: member
                             })
+                            
                         }
                     });
-    
+
                     setBoards(documents)
                 }
                 
