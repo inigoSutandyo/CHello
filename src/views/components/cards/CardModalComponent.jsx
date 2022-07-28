@@ -2,6 +2,8 @@ import React, { Fragment, useEffect, useState } from "react";
 import {
   addCardComment,
   addCheckList,
+  addDueDate,
+  addReminderDate,
   changeChecked,
   changeLabel,
   removeCheckList,
@@ -20,6 +22,7 @@ import ProgressBar from "@ramonak/react-progress-bar";
 import { MentionsInput, Mention } from 'react-mentions'
 import { useMentions } from "../../../controller/UserController";
 import CommentComponent from "./CommentComponent";
+import { convertToLocalDateTime } from "../../../util/DateTime";
 
 
 export const CardModalComponent = ({
@@ -79,7 +82,7 @@ export const CardModalComponent = ({
   }
 
 
-
+  // console.log(card.reminder)
   return (
     <div className="m-3">
       <div className="form-floating mb-3">
@@ -162,14 +165,27 @@ export const CardModalComponent = ({
         />
       </div>
 
-      <div className="mb-3">
-        <label>Due Date</label>
-        <input type="datetime-local" className="form-control" />
-      </div>
-
-      <div className="mb-3">
-        <label>Reminder Date</label>
-        <input type="datetime-local" className="form-control" />
+      <div className="mb-4 row g-3">
+        <div className="col-auto">
+          <label htmlFor="duedate">Due Date</label>
+          <input type="datetime-local" className="form-control" id="duedate" defaultValue={convertToLocalDateTime(card.due)}/>
+        </div>
+        <div className="col-auto">
+          <label htmlFor="duedate">Reminder</label>
+          <input type="datetime-local" className="form-control" id="reminder" defaultValue={convertToLocalDateTime(card.reminder)}/>
+        </div>
+        <div className="">
+          <button className="btn btn-secondary" onClick={() => {
+            const reminder = new Date(document.getElementById('reminder').value)
+            const duedate = new Date(document.getElementById('duedate').value)
+            if (Math.floor((duedate - reminder) / (1000*60*60*24)) >= 1) {
+              addDueDate(card.uid, boardId, duedate)
+              addReminderDate(card.uid, boardId, reminder)
+            }
+            // addDueDate(card.uid, boardId, duedate)
+            // addReminderDate(card.uid, boardId, reminder)
+          }}>Save Date</button>
+        </div>
       </div>
       
       {users ? (

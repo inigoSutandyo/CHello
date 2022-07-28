@@ -28,13 +28,16 @@ export const useCards = (kanbanId, board, cardUpdater) => {
             const querySnapshot = await getDocs(q)
 
             if (querySnapshot) {
-                querySnapshot.forEach((doc) => {                    
+                querySnapshot.forEach((doc) => {    
+          
                     if (refList.indexOf(doc.id) != -1) {
                         cardArr.push({
                             uid: doc.id,
+                            due: doc.data().dueDate.toDate(),
+                            reminder: doc.data().reminderDate.toDate(),
                             ...doc.data()
                         })
-                        
+
                         // console.log(doc.data())
                     }
                 })
