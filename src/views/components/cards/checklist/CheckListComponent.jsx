@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react'
 import { FaWindowClose } from 'react-icons/fa'
 import { IconContext } from 'react-icons/lib'
-import { removeCheckList } from '../../../controller/CardController'
 
 export const CheckListComponent = ({checklist, checkListHandler, removeCheckHandler, handleChange}) => {
   

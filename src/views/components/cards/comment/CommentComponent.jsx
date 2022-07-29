@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { IoSend } from "react-icons/io5";
 import { Mention, MentionsInput } from "react-mentions";
-import { addCardComment, mentionUser } from "../../../controller/CardController";
+import { addCardComment, mentionUser } from "../../../../controller/CardController";
 
 export default class CommentComponent extends Component {
   constructor(props) {

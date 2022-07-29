@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { addLabel } from '../../../controller/CardController';
-import { ErrorComponent } from '../ErrorComponent';
-import { LoadingComponent } from '../LoadingComponent';
+import { addLabel } from '../../../../controller/CardController';
+import { ErrorComponent } from '../../ErrorComponent';
+import { LoadingComponent } from '../../LoadingComponent';
 
 export const LabelModalComponent = ({card, boardId, setModalTitle}) => {
 
@@ -17,17 +17,17 @@ export const LabelModalComponent = ({card, boardId, setModalTitle}) => {
     <>
         {isLoading != true ? (
             <form onSubmit={(e) => {
-            setIsLoading(true)
-            // const lblname = document.getElementById('label-name').value
-            addLabel(e).then((msg) => {
-                setIsLoading(false)
-                setErrorMsg(msg)
-                if (msg == "") {
-                    setModalTitle("Card")
-                } else {
-                    setIsError(true)
-                }
-            })
+                setIsLoading(true)
+                // const lblname = document.getElementById('label-name').value
+                addLabel(e).then((msg) => {
+                    setIsLoading(false)
+                    setErrorMsg(msg)
+                    if (msg == "") {
+                        setModalTitle("Card")
+                    } else {
+                        setIsError(true)
+                    }
+                })
             }}>
             <input type="hidden" name="boardId" id='boardId' value={boardId}/>
             <input type="hidden" name="cardId" id='cardId' value={card.uid}/>

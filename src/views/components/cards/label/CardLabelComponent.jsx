@@ -1,5 +1,5 @@
 import React from 'react'
-import { useCardLabel } from '../../../controller/CardController'
+import { useCardLabel } from '../../../../controller/CardController'
 import { LabelComponent } from './LabelOptionComponent'
 
 

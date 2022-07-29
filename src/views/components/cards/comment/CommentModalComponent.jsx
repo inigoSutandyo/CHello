@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
-import { useCardComment } from '../../../controller/CardController'
+import { useCardComment } from '../../../../controller/CardController'
 import { CommentListComponent } from './CommentListComponent'
 import { FaArrowLeft } from "react-icons/fa";
 export const CommentModalComponent = ({

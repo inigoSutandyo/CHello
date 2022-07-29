@@ -1,7 +1,8 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, namedQuery, query, Timestamp, updateDoc, where } from "firebase/firestore"
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 import { useEffect } from "react"
 import { useState } from "react"
-import { db } from "../util/FireBaseConfig"
+import { db, storage } from "../util/FireBaseConfig"
 import { notifyUser } from "./InviteController"
 
 
@@ -243,7 +244,7 @@ export const useLabels = (boardId, cardUpdater) => {
     return labels
 }
 
-export const useCardLabel = (labels, card) => {
+export const useCardLabel = (labels, card, boardId) => {
     const [label, setLabel] = useState(null)
     useEffect(() => {
         if (!card || !labels || !card.label) {
@@ -257,8 +258,18 @@ export const useCardLabel = (labels, card) => {
                 return label
             }
         });
+
     }, [labels])
     return label
+}
+
+
+export const detachLabel = async (card, boardId) => {
+    if (!card.label) return
+
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, card.uid), {
+        label: null
+    })
 }
 
 export const addLabel = async (e) => {
@@ -312,6 +323,27 @@ export const changeLabel = async (cardId, labelId, boardId) => {
     })
 }
 
+export const deleteLabel = async (labelId, boardId, card) => {
+    // console.log(cardId)
+    if (!labelId) {
+        return
+    }
+    console.log(labelId)
+    const labelRef = doc(db.getDB(), `boards/${boardId}/labels`, labelId)
+    const q = query(collection(db.getDB(), `boards/${boardId}/cards`), where('label','==', labelRef))
+    const querySnap = await getDocs(q)
+    await deleteDoc(labelRef)
+    if (querySnap) {
+        querySnap.forEach(() => {
+            detachLabel(card, boardId)
+        })
+    }
+    // await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
+    //     label: null
+    // })
+    
+}
+
 export const addDueDate = async (cardId, boardId, date) => {
     if (!cardId || !boardId || !date) {
         return
@@ -347,4 +379,74 @@ export const mentionUser = async (data, userId) => {
         });        
     }
 
+}
+
+export const useFiles = (cardId, boardId, updater) => {
+    const [files, setFiles] = useState()
+
+    useEffect(() => {
+      if (!cardId || !boardId) {
+        return
+      }
+      const loadData = async () => {
+          const fileList = []
+          const cardRef = doc(db.getDB(), `boards/${boardId}/cards`,cardId)
+          const cardSnap = await getDoc(cardRef)
+          if (cardSnap.exists() && cardSnap.data().files) {
+
+            const data = cardSnap.data().files
+            data.forEach(path => {
+                fileList.push({
+                    filename: path.substring(path.indexOf('/') + 1),
+                    path: path
+                })
+            });
+          }
+          setFiles(fileList)
+      }
+      loadData()
+    }, [updater])
+    // console.log(files)
+    return files   
+}
+
+export const addFiles = async (cardId, boardId, files = []) => {
+
+    if (!cardId || files.length === 0) {
+        console.log("error")
+        return
+    }
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`,cardId)
+
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const storageRef = ref(storage, `${cardId}/${file.name}`);
+        try {
+            await updateDoc(cardRef, {
+                files: arrayUnion(`${cardId}/${file.name}`)
+            })
+            await uploadBytes(storageRef, file)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    // console.log("file uploaded")
+}
+export const detachFile = async (path, cardId, boardId) => {
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`,cardId)
+    await updateDoc(cardRef, {
+        files: arrayRemove(path)
+    })
+}
+export const donwloadFile = async (path) => {
+    console.log(path)
+    getDownloadURL(ref(storage, path)).then((url) => {
+        // require("../shell").openExternal(url)
+        window.open(url)
+        console.log(url)
+    })
+    .catch((error) => {
+        console.log(error)
+    });
 }

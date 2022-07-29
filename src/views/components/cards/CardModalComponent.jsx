@@ -6,6 +6,7 @@ import {
   addReminderDate,
   changeChecked,
   changeLabel,
+  detachLabel,
   removeCheckList,
   updateDescription,
   updateTitle,
@@ -14,14 +15,12 @@ import {
   useCheckList,
   useLabels,
 } from "../../../controller/CardController";
-import { CheckListComponent } from "./CheckListComponent";
-import {IoSend} from "react-icons/io5"
+import { CheckListComponent } from "./checklist/CheckListComponent";
 import parse from "html-react-parser";
-import { LabelOptionComponent } from "./LabelOptionComponent";
+import { LabelOptionComponent } from "./label/LabelOptionComponent";
 import ProgressBar from "@ramonak/react-progress-bar";
-import { MentionsInput, Mention } from 'react-mentions'
 import { useMentions } from "../../../controller/UserController";
-import CommentComponent from "./CommentComponent";
+import CommentComponent from "./comment/CommentComponent";
 import { convertToLocalDateTime } from "../../../util/DateTime";
 
 
@@ -41,7 +40,7 @@ export const CardModalComponent = ({
 
   const {checklist, progress} = useCheckList(card, boardId, checkUpdater);
   const labels = useLabels(boardId, cardUpdater)
-  const label = useCardLabel(labels, card)
+  const label = useCardLabel(labels, card, boardId)
   const users = useMentions(userId)
   // console.log(users)
   const checkListHandler = (e) => {
@@ -123,12 +122,17 @@ export const CardModalComponent = ({
       </div>
 
       <div className="mb-5">
-        <input type="button" className="btn btn-outline-dark mb-3" value="Create New Label" onClick={() => {
+        <input type="button" className="btn btn-outline-dark mb-3 me-2" value="Create New Label" onClick={() => {
           setModalTitle("Label")
+        }}/>
+        <input type="button" className="btn btn-outline-dark mb-3" value="Detach Current Label" onClick={() => {
+          detachLabel(card, boardId)
         }}/>
         {card.label ?  (
           label ? (
-            <select className="form-select" id="label-select" aria-label="Choose Label" defaultValue={label.uid} onChange={() => {
+            <select className="form-select" id="label-select" aria-label="Choose Label" defaultValue={
+              label ? label.uid : "-1"
+            } onChange={() => {
               const selected = document.getElementById('label-select').value
               handleLabelChange(selected)            
             }}>
@@ -188,6 +192,12 @@ export const CardModalComponent = ({
         </div>
       </div>
       
+      <div className="mb-3 d-flex justify-content-center">
+        <input type="button" className="btn btn-outline-secondary" value="Attachments" onClick={() => {
+          setModalTitle("Attachments")
+        }}/>
+      </div>
+
       {users ? (
         <div className="mb-3">
           <label>Card Comment</label>
@@ -197,11 +207,10 @@ export const CardModalComponent = ({
             <CommentComponent users={users} card = {card} userId={userId} boardId={boardId}/>
             
           </div>
+          <div className="d-flex justify-content-center">
             <input type="button" className="btn btn-outline-secondary" value="View All Comments" onClick={() => {
               setModalTitle("Comments")
             }}/>
-          <div>
-
           </div>
         </div>
       ) : <></>}

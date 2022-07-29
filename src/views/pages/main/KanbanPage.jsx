@@ -9,9 +9,11 @@ import {
   getKanban,
   useKanban,
 } from "../../../controller/KanbanController";
+import { AttachmentModalComponent } from "../../components/cards/attachment/AttachmentModalComponent";
 import { CardModalComponent } from "../../components/cards/CardModalComponent";
-import { CommentModalComponent } from "../../components/cards/CommentModalComponent";
-import { LabelModalComponent } from "../../components/cards/LabelModalComponent";
+import { CommentModalComponent } from "../../components/cards/comment/CommentModalComponent";
+import { LabelManagementComponent } from "../../components/cards/label/LabelManagementComponent";
+import { LabelModalComponent } from "../../components/cards/label/LabelModalComponent";
 import { KanbanListComponent } from "../../components/lists/KanbanListComponent";
 import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";
@@ -20,7 +22,7 @@ export const KanbanPage = ({ userId }) => {
   const { boardId } = useParams();
 
   const [isModal, setIsModal] = useState(false);
-  const [modalTitle, setModalTitle] = useState("")
+  const [modalTitle, setModalTitle] = useState("");
   const [card, setCard] = useState({});
   const [kanban, setKanban] = useState({});
   const [listUpdater, setListUpdater] = useState(0);
@@ -37,11 +39,9 @@ export const KanbanPage = ({ userId }) => {
     setListUpdater(listUpdater + 1);
   }, [board]);
 
-
-
   const onDragEnd = (result) => {
-    console.log(result)
-  }
+    console.log(result);
+  };
 
   return (
     <div id="kanban-page">
@@ -50,30 +50,61 @@ export const KanbanPage = ({ userId }) => {
       ) : (
         <div className="m-3">
           <h3>Board {board.title}</h3>
+          <div>
+            <button className="btn btn-primary" onClick={() => {
+              setIsModal(true)
+              setModalTitle("Label Management")
+            }}>Manage Labels</button>
+          </div>
+
           <ModalComponent
             isModal={isModal}
             setIsModal={setIsModal}
             text={modalTitle}
             appELement={"#kanban-page"}
           >
-            {modalTitle == "Card" ? 
+            {modalTitle == "Card" ? (
               <CardModalComponent
                 card={card}
                 kanbanId={kanban.uid}
                 boardId={boardId}
                 cardUpdater={cardUpdater}
                 setCardUpdater={setCardUpdater}
-                userId = {userId}
-                setModalTitle = {setModalTitle}
+                userId={userId}
+                setModalTitle={setModalTitle}
                 listUpdater={listUpdater}
                 setListUpdater={setListUpdater}
               />
-              : modalTitle == "Comments" ?
-              <CommentModalComponent card={card} boardId={boardId} setModalTitle={setModalTitle}/>
-              : modalTitle == "Label" ?
-              <LabelModalComponent card={card} boardId={boardId} setModalTitle={setModalTitle}/> 
-              : <div></div>
-            }
+            ) : modalTitle == "Comments" ? (
+              <CommentModalComponent
+                card={card}
+                boardId={boardId}
+                setModalTitle={setModalTitle}
+              />
+            ) : modalTitle == "Label" ? (
+              <LabelModalComponent
+                card={card}
+                boardId={boardId}
+                setModalTitle={setModalTitle}
+              />
+            ) : modalTitle == "Attachments" ? (
+              <AttachmentModalComponent
+                card={card}
+                boardId={boardId}
+                setModalTitle={setModalTitle}
+                cardUpdater={cardUpdater}
+                setCardUpdater={setCardUpdater}
+              />
+            ) : modalTitle === "Label Management" ? (
+              <div>
+                <LabelManagementComponent
+                  card={card}
+                  boardId={boardId}
+                  setModalTitle={setModalTitle}
+                  cardUpdater={cardUpdater}
+                />
+              </div>
+            ) : <div></div>}
           </ModalComponent>
 
           <div>
@@ -85,7 +116,12 @@ export const KanbanPage = ({ userId }) => {
                 });
               }}
             >
-              <input type="hidden" name="boardId" id="boardId" value={board.uid} />
+              <input
+                type="hidden"
+                name="boardId"
+                id="boardId"
+                value={board.uid}
+              />
 
               <div className="col-auto">
                 <input
@@ -97,49 +133,58 @@ export const KanbanPage = ({ userId }) => {
                   placeholder="Add New List"
                 />
               </div>
-              
+
               <div className="col-auto">
-                <button type="submit" className="btn btn-primary mb-3 px-2 py-1">
+                <button
+                  type="submit"
+                  className="btn btn-primary mb-3 px-2 py-1"
+                >
                   <VscAdd />
                 </button>
               </div>
             </form>
 
             <div className="d-flex">
-              {kanbans.length === 0 ?  
+              {kanbans.length === 0 ? (
                 <h5 className="fs-2 fw-bold">
                   No Lists created yet. Why don't you go ahead and create one?
-                </h5> : (
-                  
-                    <DragDropContext onDragEnd={onDragEnd}>
-                      <Droppable droppableId='allCols' type='column' direction='horizontal'>
-                        {provided=>
-                          <div {...provided.droppableProps} ref={provided.innerRef} className="overflow d-flex">
-                            {kanbans.map((k, i) => 
-                              <KanbanListComponent
-                                key={k.uid}
-                                kanban={k}
-                                board={board}
-                                addNewCard={addNewCard}
-                                setIsModal={setIsModal}
-                                setModalTitle={setModalTitle}
-                                setCard={setCard}
-                                setKanban={setKanban}
-                                listUpdater={listUpdater}
-                                setListUpdater={setListUpdater}
-                                cardUpdater={cardUpdater}
-                                setCardUpdater={setCardUpdater}
-                                index={i}
-                              />
-                            )}
-                            {provided.placeholder}
-                          </div>
-                        }
-                      </Droppable>
-                    </DragDropContext>
-                  
-                )
-              }
+                </h5>
+              ) : (
+                <DragDropContext onDragEnd={onDragEnd}>
+                  <Droppable
+                    droppableId="allCols"
+                    type="column"
+                    direction="horizontal"
+                  >
+                    {(provided) => (
+                      <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        className="overflow d-flex"
+                      >
+                        {kanbans.map((k, i) => (
+                          <KanbanListComponent
+                            key={k.uid}
+                            kanban={k}
+                            board={board}
+                            addNewCard={addNewCard}
+                            setIsModal={setIsModal}
+                            setModalTitle={setModalTitle}
+                            setCard={setCard}
+                            setKanban={setKanban}
+                            listUpdater={listUpdater}
+                            setListUpdater={setListUpdater}
+                            cardUpdater={cardUpdater}
+                            setCardUpdater={setCardUpdater}
+                            index={i}
+                          />
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                </DragDropContext>
+              )}
             </div>
           </div>
         </div>

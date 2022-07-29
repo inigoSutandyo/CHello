@@ -6,7 +6,7 @@ import { initializeApp } from "firebase/app";
 
 import {getAuth} from 'firebase/auth'
 import { getFirestore } from "firebase/firestore";
-
+import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyB6Awo2iM_RdzewGpF6mZkPmaaQRev1f6c",
@@ -60,3 +60,5 @@ export const auth = (function () {
       },
   };
 })();
+
+export const storage = getStorage();

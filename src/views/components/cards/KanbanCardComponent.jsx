@@ -2,7 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import { useCards, useLabels } from '../../../controller/CardController'
 import parse from "html-react-parser";
-import { CardLabelComponent } from './CardLabelComponent';
+import { CardLabelComponent } from './label/CardLabelComponent';
 
 export const KanbanCardComponent = ({kanban, board, setIsModal, setCard, setKanban, cardUpdater, setModalTitle}) => {
   const cards = useCards(kanban.uid, board, cardUpdater)
