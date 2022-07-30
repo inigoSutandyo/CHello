@@ -19,7 +19,6 @@ export const BoardListComponent = ({
       >
         <div className="card-body d-flex flex-column">
           <h4 className="card-title mb-3 text-wrap">{board.title}</h4>
-          {board.visibility === "public" || membership === "admin" || board.curr_membership !== "none"? (
             <div className="d-flex flex-row justify-content-between align-items-center">
               <Link to={`/board/${board.uid}`} className="me-2">
                 <div className="btn btn-primary">Open</div>
@@ -36,7 +35,6 @@ export const BoardListComponent = ({
                 </a>
               ) : <></>}
             </div>
-          ) : <div></div>}
         </div>
       </div>
     </>

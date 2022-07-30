@@ -1,19 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
+import { FaArrowLeft } from "react-icons/fa";
 import { VscAdd } from "react-icons/vsc";
-import { useParams } from "react-router-dom";
-import { useBoardById } from "../../../controller/BoardController";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  changeMembershipBoard,
+  changeVisibilityBoard,
+  joinBoard,
+  removeBoardUser,
+  useBoardById,
+} from "../../../controller/BoardController";
 import { addNewCard } from "../../../controller/CardController";
 import {
   addNewList,
   getKanban,
   useKanban,
 } from "../../../controller/KanbanController";
+import { BoardMembershipComponent } from "../../components/boards/BoardMembershipComponent";
+import { ButtonGroup } from "../../components/ButtonGroup";
 import { AttachmentModalComponent } from "../../components/cards/attachment/AttachmentModalComponent";
 import { CardModalComponent } from "../../components/cards/CardModalComponent";
 import { CommentModalComponent } from "../../components/cards/comment/CommentModalComponent";
 import { LabelManagementComponent } from "../../components/cards/label/LabelManagementComponent";
 import { LabelModalComponent } from "../../components/cards/label/LabelModalComponent";
+import WatcherModalComponent from "../../components/cards/watchers/WatcherModalComponent";
 import { KanbanListComponent } from "../../components/lists/KanbanListComponent";
 import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";
@@ -27,8 +37,9 @@ export const KanbanPage = ({ userId }) => {
   const [kanban, setKanban] = useState({});
   const [listUpdater, setListUpdater] = useState(0);
   const [cardUpdater, setCardUpdater] = useState(0);
+  const [boardUpdater, setBoardUpdater] = useState(0);
 
-  const board = useBoardById(boardId);
+  const board = useBoardById(boardId, userId, boardUpdater);
   const kanbans = useKanban(board, listUpdater);
 
   useEffect(() => {
@@ -42,6 +53,27 @@ export const KanbanPage = ({ userId }) => {
   const onDragEnd = (result) => {
     console.log(result);
   };
+  const navigate = useNavigate();
+
+  const handleMembershipChange = (userId) => {
+    changeMembershipBoard(boardId, userId).then(() => {
+      console.log(userId);
+      setBoardUpdater(boardUpdater + 1);
+    });
+  };
+
+  const handleUserRemoval = (userId) => {
+    removeBoardUser(boardId, userId).then(() => {
+      console.log(userId);
+      setBoardUpdater(boardUpdater + 1);
+    });
+  };
+
+  const handleVisibility = (visibility) => {
+    changeVisibilityBoard(boardId, visibility).then(
+      setBoardUpdater(boardUpdater + 1)
+    );
+  }
 
   return (
     <div id="kanban-page">
@@ -49,13 +81,57 @@ export const KanbanPage = ({ userId }) => {
         <LoadingComponent />
       ) : (
         <div className="m-3">
-          <h3>Board {board.title}</h3>
-          <div>
-            <button className="btn btn-primary" onClick={() => {
-              setIsModal(true)
-              setModalTitle("Label Management")
-            }}>Manage Labels</button>
+          <h3 className="fw-3">Board {board.title}</h3>
+          <div className="d-flex justify-content-start">
+            <div
+              className="m-2"
+              onClick={() => {
+                navigate(-1);
+              }}
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              <FaArrowLeft />
+            </div>
           </div>
+          {board.curr_membership !== "none" ? (
+            <>
+              <ButtonGroup
+                board={board}
+                currentUserId={userId}
+                handleUserRemoval={handleUserRemoval}
+                handleVisibility={handleVisibility}
+                navigate={navigate}
+                setIsModal={setIsModal}
+                setModalTitle={setModalTitle}
+              />
+              {board.curr_membership === "admin" ? (
+                <div>
+                  <button
+                    className="btn btn-primary mt-2"
+                    onClick={() => {
+                      setIsModal(true);
+                      setModalTitle("Label Management");
+                    }}
+                  >
+                    Manage Labels
+                  </button>
+                </div>
+              ) : <></>}
+            </>
+          ) : (
+            <div>
+              <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    joinBoard(boardId, userId).then(() => setBoardUpdater(boardUpdater + 1))
+                  }}
+                  >
+                    Join Board
+              </button>
+            </div>
+          )}
 
           <ModalComponent
             isModal={isModal}
@@ -104,7 +180,19 @@ export const KanbanPage = ({ userId }) => {
                   cardUpdater={cardUpdater}
                 />
               </div>
-            ) : <div></div>}
+            ) : modalTitle === "Watchers" ? (
+              <WatcherModalComponent card={card} boardId={boardId} />
+            ) : modalTitle === "Board Members" ? (
+              <BoardMembershipComponent
+                board={board}
+                handleMembershipChange={handleMembershipChange}
+                handleUserRemoval={handleUserRemoval}
+                membership={board.curr_membership}
+                userId={userId}
+              />
+            ) : (
+              <></>
+            )}
           </ModalComponent>
 
           <div>

@@ -193,6 +193,11 @@ export const CardModalComponent = ({
       </div>
       
       <div className="mb-3 d-flex justify-content-center">
+        <input type="button" className="btn btn-outline-secondary" value="Assign Watchers" onClick={() => {
+          setModalTitle("Watchers")
+        }}/>
+      </div>
+      <div className="mb-3 d-flex justify-content-center">
         <input type="button" className="btn btn-outline-secondary" value="Attachments" onClick={() => {
           setModalTitle("Attachments")
         }}/>

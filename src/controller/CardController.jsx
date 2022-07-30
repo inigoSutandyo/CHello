@@ -450,3 +450,48 @@ export const donwloadFile = async (path) => {
         console.log(error)
     });
 }
+
+export const useWatchers = (cardId, boardId) => {
+    const [watchers, setWatchers] = useState()
+    useEffect(() => {
+        if (!cardId || !boardId) return;
+        const watcherList= []
+        const loadData = async () => {
+            const cardSnap = await getDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId))
+            if (cardSnap.exists()) {
+                const data = cardSnap.data()
+                if (data.watchers) {
+                    data.watchers.forEach(watcher => {
+                        watcherList.push(watcher)
+                    });
+                }
+            }
+            setWatchers(watcherList)
+        }
+        loadData()
+    }, [cardId])
+    return watchers
+}
+
+export const useMembers = (boardId) => {
+    const [members, setMembers] = useState()
+    useEffect(() => {
+        if (!boardId) return;
+        const memberList= []
+        const loadData = async () => {
+            const boardSnap = await getDoc(doc(db.getDB(), `boards`, boardId))
+            if (boardSnap.exists()) {
+                const data = boardSnap.data()
+                if (data.members) {
+                    data.members.forEach(member => {
+                        memberList.push(member)
+                    });
+                }
+            }
+            setMembers(memberList)
+        }
+        loadData()
+    }, [boardId])
+
+    return members
+}

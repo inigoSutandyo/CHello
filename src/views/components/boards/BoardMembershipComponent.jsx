@@ -3,15 +3,16 @@ import { inviteUser } from "../../../controller/InviteController";
 import { useWorkspaceUsers } from "../../../controller/WorkspaceController";
 import { VscAdd } from "react-icons/vsc";
 import { MemberComponent } from "../MemberComponent";
+import { useBoardUsers } from "../../../controller/BoardController";
 
-export const WorkspaceMemberComponent = ({
-  workSpace,
+export const BoardMembershipComponent = ({
+  board,
   userId,
   handleMembershipChange,
   handleUserRemoval,
   membership,
 }) => {
-  const { admins, members } = useWorkspaceUsers(workSpace);
+  const { admins, members } = useBoardUsers(board);
 
   return (
     <div className="m-2">
@@ -81,12 +82,12 @@ export const WorkspaceMemberComponent = ({
             className="btn btn-primary mb-3 px-2 py-1"
             onClick={() => {
               const memberEmail = document.getElementById("memberEmail").value;
-              console.log(workSpace.uid);
+              console.log(board.uid);
               inviteUser(
                 userId,
                 memberEmail,
-                workSpace.uid,
-                "workspaces",
+                board.uid,
+                "boards",
                 "member"
               );
               document.getElementById("memberEmail").value = "";

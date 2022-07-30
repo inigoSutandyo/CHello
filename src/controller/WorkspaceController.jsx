@@ -315,11 +315,6 @@ export const changeMembership = async (userId, workspaceId) => {
   const workspaceSnap = await getDoc(workspaceRef)
   if (workspaceSnap.exists()) {
     const data = workspaceSnap.data()
-    // if (data.members[0] == userRef) {
-    //   console.log("found")
-    // }
-    // console.log(data.members[0])
-    // console.log(userRef)
 
     const isAdmin = data.admins.find((admin) => {
       return admin.id === userRef.id
@@ -356,10 +351,8 @@ const checkWorkspaceMembers = async (workspaceId) => {
   if (workspaceSnap.exists()) {
     const data =workspaceSnap.data()
     if ((!data.admins || data.admins.length === 0) && (!data.members || data.members.length === 0)) {
-      console.log("test")
       deleteWorkspace(workspaceId)
     }
-    
   }
 }
 

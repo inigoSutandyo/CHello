@@ -1,9 +1,6 @@
 const path = require('path');
-const electron = require('electron');
-const app = electron.app
-const BrowserWindow = electron.BrowserWindow
-const Tray = electron.Tray
 const isDev = require('electron-is-dev');
+const { BrowserWindow, app, globalShortcut } = require('electron');
 
 const loadTemplate = isDev
 ? 'http://localhost:3000'
@@ -54,13 +51,17 @@ function createWindow() {
   // ])
 }
 
-// app.whenReady().then(() => {
-//   globalShortcut.register('Alt+CommandOrControl+I', () => {
-//     console.log('Electron loves global shortcuts!')
-//   })
-// }).then(createWindow)
+app.whenReady().then(() => {
+  // console.log("asdasd")
+  globalShortcut.register('CommandOrControl+N', () => {
+    createWindow()
+  })
+  globalShortcut.register('CommandOrControl+Q', () => {
+    app.quit()
+  })
+}).then(createWindow)
 
-app.whenReady().then(createWindow)
+// app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

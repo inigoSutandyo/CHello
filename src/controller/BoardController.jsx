@@ -121,7 +121,7 @@ export const userLeaveBoard = async (userId, boardId, workspaceId, membership) =
 const removeUser = async (userId, boardId, membership) => {
     const userRef = doc(db.getDB(), 'users', userId)
     
-    if (membership == "mebmer") {
+    if (membership == "member") {
         return await updateDoc(doc(db.getDB(), 'boards', boardId), {
             members: arrayRemove(userRef)
         })
@@ -142,20 +142,29 @@ export const deleteBoard = async (boardId, workSpaceId) => {
     return ""
 }
 
-export const useBoardById = (boardId) => {
+export const useBoardById = (boardId, userId, boardUpdater) => {
     const [board, setBoard] = useState(null)
     
     useEffect(() => {
+        if (!userId) return
+
         const loadAsync = async () => {
+            const userRef = doc(db.getDB(), 'users', userId)
             const docRef = doc(db.getDB(), 'boards', boardId)
             const docSnap = await getDoc(docRef)
             
             if (docSnap.exists()) {
-                setBoard(docSnap.data())
+                const data = docSnap.data()
+                const membership = checkMembership(data, userRef)
+                setBoard({
+                    ...docSnap.data(),
+                    curr_membership: membership
+                })
             }
         }
         loadAsync()
-    }, [boardId]);
+    }, [boardId, userId, boardUpdater]);
+
     return board
 }
 
@@ -167,10 +176,134 @@ export const addAdminBoard = async (boardId, userId) => {
         admins: arrayUnion(docRef)
     })
 }
+
+export const joinBoard = async (boardId, userId) => {
+    const docRef = doc(db.getDB(),'users',userId)
+    const boardRef = doc(db.getDB(),'boards',boardId)
+    await updateDoc(boardRef, {
+        members: arrayUnion(docRef)
+    })
+}
 export const addListInBoard = async (boardId) => {
     addTemplateList(boardId).then(async (listRef) => {
         await updateDoc(listRef, {
             uid: listRef.id
         })
+    })
+}
+
+export const removeBoardUser = async (boardId, userId) => {
+    const boardRef = doc(db.getDB(), 'boards', boardId)
+    const boardSnap = await getDoc(boardRef)
+    if (boardSnap.exists()) {
+        const data = boardSnap.data()
+        const userRef = doc(db.getDB(), 'users', userId)
+        const membership = checkMembership(data, userRef)
+        if (membership == "admin") {
+            await updateDoc(boardRef, {
+                admins: arrayRemove(userRef)
+            })
+        } else if (membership == "member") {
+            await updateDoc(boardRef, {
+                members: arrayRemove(userRef)
+            })
+        }
+    }
+}
+
+export const changeMembershipBoard = async (boardId, userId) => {
+  const userRef = doc(db.getDB(), "users", userId)
+  const boardRef = doc(db.getDB(), "boards", boardId)
+  const boardSnap = await getDoc(boardRef)
+  if (boardSnap.exists()) {
+    const data = boardSnap.data()
+
+    const membership = checkMembership(data, userRef)
+    // console.log(isAdmin)
+    if (membership === "admin") {
+      toMember(userRef, boardRef)
+    } else if (membership ==="member") {
+      toAdmin(userRef, boardRef)
+    }
+  }
+}
+
+const toMember = async (userRef, boardRef) => {
+    await updateDoc(boardRef, {
+      admins: arrayRemove(userRef),
+      members: arrayUnion(userRef)
+    })
+}
+  
+const toAdmin = async (userRef, boardRef) => {
+    await updateDoc(boardRef, {
+        admins: arrayUnion(userRef),
+        members: arrayRemove(userRef)
+    })
+} 
+
+export const useBoardUsers = (board) => {
+    const [admins, setAdmins] = useState([]) 
+    const [members, setMembers] = useState([]) 
+  
+    // const [loading, setLoading] = useState(false)
+    useEffect(() => {
+      if (board == null) {
+        return;
+      }
+  
+      const loadData = async () => {
+        const adminRefs = [];
+        const memberRefs = [];
+        const adminList = [];
+        const memberList = [];
+  
+        try {
+          if (board.admins) {
+            board.admins.forEach((admin) => {
+              adminRefs.push(admin.id);
+            });
+          }
+          if (board.members) {
+            board.members.forEach((member) => {
+              memberRefs.push(member.id);
+            });
+          }
+  
+          const querySnapshot = await getDocs(collection(db.getDB(), "users"));
+          if (querySnapshot) {
+            querySnapshot.forEach((doc) => {
+              if (adminRefs.indexOf(doc.id) != -1) {
+                adminList.push({
+                  uid: doc.id,
+                  role: "admin",
+                  ...doc.data(),
+                });
+              } else if (memberRefs.indexOf(doc.id) != -1) {
+                memberList.push({
+                  uid: doc.id,
+                  role: "member",
+                  ...doc.data(),
+                });
+              } 
+            });
+          }
+          setAdmins(adminList);
+          setMembers(memberList);
+  
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      loadData();
+    }, [board]);
+  
+    // console.log(admins);
+    return { admins, members };
+};
+
+export const changeVisibilityBoard = async (boardId, visibility) => {
+    await updateDoc(doc(db.getDB(), 'boards', boardId), {
+        visibility: visibility
     })
 }
