@@ -29,16 +29,17 @@ export const useCards = (kanbanId, board, cardUpdater) => {
             const querySnapshot = await getDocs(q)
 
             if (querySnapshot) {
-                querySnapshot.forEach((doc) => {    
+                querySnapshot.forEach((card) => {    
           
-                    if (refList.indexOf(doc.id) != -1) {
+                    if (refList.indexOf(card.id) != -1) {
+                        const due = card.data().dueDate ? card.data().dueDate.toDate() : null
+                        const reminder = card.data().reminderDate ? card.data().reminderDate.toDate() : null
                         cardArr.push({
-                            uid: doc.id,
-                            due: doc.data().dueDate.toDate(),
-                            reminder: doc.data().reminderDate.toDate(),
-                            ...doc.data()
+                            uid: card.id,
+                            due: due,
+                            reminder: reminder,
+                            ...card.data()
                         })
-
                         // console.log(doc.data())
                     }
                 })
@@ -49,6 +50,38 @@ export const useCards = (kanbanId, board, cardUpdater) => {
     }, [cardUpdater])
     // console.log(cards)
     return cards
+}
+
+export const useCardById = (cardId, boardId, updater) => {
+    const [card, setCard] = useState(null)
+
+    useEffect(() => {
+      console.log(cardId)
+      if (!cardId || !boardId) return
+      const loadData = async () => {
+        const cardSnap = await getDoc(doc(db.getDB(), `boards/${boardId}/cards`,cardId))
+        if (cardSnap.exists()) {
+            const watchersId = []
+            if (cardSnap.data().watchers) {
+                for (let i = 0; i < cardSnap.data().watchers.length; i++) {
+                    watchersId.push(cardSnap.data().watchers[i].id)
+                }
+            }
+            const due = cardSnap.data().dueDate ? cardSnap.data().dueDate.toDate() : null
+            const reminder = cardSnap.data().reminderDate ? cardSnap.data().reminderDate.toDate() : null
+            setCard({
+                uid: cardSnap.id,
+                due: due,
+                reminder: reminder,
+                watchersId: watchersId,
+                ...cardSnap.data()
+            })
+        }
+      }
+      loadData()
+    }, [cardId])
+    // console.log(card)
+    return card
 }
 
 export const addNewCard = async (e) => {  
@@ -135,7 +168,7 @@ export const useCheckList = (card, boardId, checkUpdater) => {
             }
         }
         loadData()
-    }, [checkUpdater])
+    }, [card, checkUpdater])
 
     useEffect(() => {
         if (!checklist) {
@@ -224,7 +257,6 @@ export const useLabels = (boardId, cardUpdater) => {
       const loadData = async () => {
           try {
             const labelSnapshot = await getDocs(collection(db.getDB(), `/boards/${boardId}/labels`))
-            // console.log(labelSnapshot)
             if (labelSnapshot) {
                 labelSnapshot.forEach((doc) => {
                     labelList.push({
@@ -236,7 +268,7 @@ export const useLabels = (boardId, cardUpdater) => {
                 setLabels(labelList)
             }
           } catch (error) {
-            // console.log(error)
+            console.log(error)
           }
       }
       loadData()
@@ -244,32 +276,33 @@ export const useLabels = (boardId, cardUpdater) => {
     return labels
 }
 
-export const useCardLabel = (labels, card, boardId) => {
+export const useCardLabel = (labels, card) => {
     const [label, setLabel] = useState(null)
     useEffect(() => {
         if (!card || !labels || !card.label) {
             return 
         }
         labels.forEach(label => {
-            // console.log(card.label.id, label.ref.id)
-            if (card.label.id == label.ref.id) {
-                // console.log(card.title, label.name)
+            
+            if (card.label !== null && card.label.id == label.ref.id) {
                 setLabel(label)
                 return label
-            }
+            } 
         });
 
-    }, [labels])
+    }, [labels, card])
+    // console.log(label)
     return label
 }
 
 
 export const detachLabel = async (card, boardId) => {
     if (!card.label) return
-
+    
     await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, card.uid), {
         label: null
     })
+    console.log("detached")
 }
 
 export const addLabel = async (e) => {
@@ -323,7 +356,7 @@ export const changeLabel = async (cardId, labelId, boardId) => {
     })
 }
 
-export const deleteLabel = async (labelId, boardId, card) => {
+export const deleteLabel = async (labelId, boardId) => {
     // console.log(cardId)
     if (!labelId) {
         return
@@ -334,13 +367,11 @@ export const deleteLabel = async (labelId, boardId, card) => {
     const querySnap = await getDocs(q)
     await deleteDoc(labelRef)
     if (querySnap) {
-        querySnap.forEach(() => {
+        querySnap.forEach((card) => {
             detachLabel(card, boardId)
         })
     }
-    // await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
-    //     label: null
-    // })
+    await deleteDoc(doc(db.getDB(), `boards/${boardId}/labels`, labelId))
     
 }
 

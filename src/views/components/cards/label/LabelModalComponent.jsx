@@ -3,7 +3,7 @@ import { addLabel } from '../../../../controller/CardController';
 import { ErrorComponent } from '../../ErrorComponent';
 import { LoadingComponent } from '../../LoadingComponent';
 
-export const LabelModalComponent = ({card, boardId, setModalTitle}) => {
+export const LabelModalComponent = ({card, boardId, setModalTitle, initiateUpdateLabel}) => {
 
   const [errorMsg, setErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false)
@@ -22,11 +22,13 @@ export const LabelModalComponent = ({card, boardId, setModalTitle}) => {
                 addLabel(e).then((msg) => {
                     setIsLoading(false)
                     setErrorMsg(msg)
-                    if (msg == "") {
-                        setModalTitle("Card")
+                    if (msg === "") {
+                        setModalTitle("Label Management")
+                        initiateUpdateLabel()
                     } else {
                         setIsError(true)
                     }
+                    
                 })
             }}>
             <input type="hidden" name="boardId" id='boardId' value={boardId}/>

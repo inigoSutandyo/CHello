@@ -4,12 +4,12 @@ import { IconContext } from 'react-icons/lib'
 import { deleteLabel, useLabels } from '../../../../controller/CardController'
 
 export const LabelManagementComponent = ({
-  card,
+  labels,
   boardId,
-  setModalTitle,
-  cardUpdater,
+  initiateUpdateLabel,
+  initiateUpdateCard
 }) => {
-  const labels = useLabels(boardId, cardUpdater)
+
   return (
     <div>
         {!labels || labels.length === 0 ? <></> : (
@@ -25,8 +25,9 @@ export const LabelManagementComponent = ({
                       <FaWindowClose style={{
                         cursor: "pointer"
                       }} onClick = {() => {
-                        deleteLabel(l.uid, boardId, card).then(() => {
-                            console.log("done")
+                        deleteLabel(l.uid, boardId).then(() => {
+                          initiateUpdateLabel()
+                          initiateUpdateCard()
                         })
                       }}/>
                     </IconContext.Provider>

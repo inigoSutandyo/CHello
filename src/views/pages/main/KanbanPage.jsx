@@ -10,7 +10,7 @@ import {
   removeBoardUser,
   useBoardById,
 } from "../../../controller/BoardController";
-import { addNewCard } from "../../../controller/CardController";
+import { addNewCard, useLabels } from "../../../controller/CardController";
 import {
   addNewList,
   getKanban,
@@ -38,9 +38,10 @@ export const KanbanPage = ({ userId }) => {
   const [listUpdater, setListUpdater] = useState(0);
   const [cardUpdater, setCardUpdater] = useState(0);
   const [boardUpdater, setBoardUpdater] = useState(0);
-
+  const [labelUpdater, setLabelUpdater] = useState(0)
   const board = useBoardById(boardId, userId, boardUpdater);
   const kanbans = useKanban(board, listUpdater);
+  const labels = useLabels(boardId, labelUpdater)
 
   useEffect(() => {
     setCardUpdater(cardUpdater + 1);
@@ -55,29 +56,40 @@ export const KanbanPage = ({ userId }) => {
   };
   const navigate = useNavigate();
 
+  const initiateUpdateBoard = () => {
+    setBoardUpdater(boardUpdater + 1);
+  }
+  const initiateUpdateCard = () => {
+    setCardUpdater(cardUpdater + 1);
+  }
+
+  const initiateUpdateLabel = () => {
+    setLabelUpdater(labelUpdater+1)
+  }
+
   const handleMembershipChange = (userId) => {
     changeMembershipBoard(boardId, userId).then(() => {
       console.log(userId);
-      setBoardUpdater(boardUpdater + 1);
+      initiateUpdateBoard()
     });
   };
 
   const handleUserRemoval = (userId) => {
     removeBoardUser(boardId, userId).then(() => {
       console.log(userId);
-      setBoardUpdater(boardUpdater + 1);
+      initiateUpdateBoard()
     });
   };
 
   const handleVisibility = (visibility) => {
     changeVisibilityBoard(boardId, visibility).then(
-      setBoardUpdater(boardUpdater + 1)
+      initiateUpdateBoard()
     );
   }
 
   return (
     <div id="kanban-page">
-      {kanbans == null || board == null ? (
+      {kanbans === null || board === null || labels === null? (
         <LoadingComponent />
       ) : (
         <div className="m-3">
@@ -125,7 +137,7 @@ export const KanbanPage = ({ userId }) => {
               <button
                   className="btn btn-primary"
                   onClick={() => {
-                    joinBoard(boardId, userId).then(() => setBoardUpdater(boardUpdater + 1))
+                    joinBoard(boardId, userId).then(() => initiateUpdateBoard())
                   }}
                   >
                     Join Board
@@ -141,15 +153,14 @@ export const KanbanPage = ({ userId }) => {
           >
             {modalTitle == "Card" ? (
               <CardModalComponent
-                card={card}
-                kanbanId={kanban.uid}
-                boardId={boardId}
+                cardId={card.uid}
+                setCard={setCard}
                 cardUpdater={cardUpdater}
-                setCardUpdater={setCardUpdater}
+                boardId={boardId}
+                labels={labels}
+                initiateUpdateCard = {initiateUpdateCard}
                 userId={userId}
                 setModalTitle={setModalTitle}
-                listUpdater={listUpdater}
-                setListUpdater={setListUpdater}
               />
             ) : modalTitle == "Comments" ? (
               <CommentModalComponent
@@ -162,6 +173,7 @@ export const KanbanPage = ({ userId }) => {
                 card={card}
                 boardId={boardId}
                 setModalTitle={setModalTitle}
+                initiateUpdateLabel = {initiateUpdateLabel}
               />
             ) : modalTitle == "Attachments" ? (
               <AttachmentModalComponent
@@ -174,15 +186,13 @@ export const KanbanPage = ({ userId }) => {
             ) : modalTitle === "Label Management" ? (
               <div>
                 <LabelManagementComponent
-                  card={card}
+                  labels={labels}
                   boardId={boardId}
-                  setModalTitle={setModalTitle}
-                  cardUpdater={cardUpdater}
+                  initiateUpdateLabel={initiateUpdateLabel}
+                  initiateUpdateCard={initiateUpdateCard}
                 />
               </div>
-            ) : modalTitle === "Watchers" ? (
-              <WatcherModalComponent card={card} boardId={boardId} />
-            ) : modalTitle === "Board Members" ? (
+            )  : modalTitle === "Board Members" ? (
               <BoardMembershipComponent
                 board={board}
                 handleMembershipChange={handleMembershipChange}
