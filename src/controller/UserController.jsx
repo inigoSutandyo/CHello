@@ -1,8 +1,9 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth"
+import { AuthCredential, createUserWithEmailAndPassword, EmailAuthProvider, reauthenticateWithCredential, signInWithEmailAndPassword, signOut, updatePassword, updateProfile } from "firebase/auth"
 import { auth, db } from "../util/FireBaseConfig"
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore"; 
+import { collection, doc, getDoc, getDocs, setDoc, Timestamp, updateDoc } from "firebase/firestore"; 
 import { createUser } from "../factory/UserFactory";
 import { useEffect, useState } from "react";
+import { convertToDate } from "../util/DateTime";
 
 export const registerAuth = async (email, password, confirm) => {
     // console.log(email + " " + password)
@@ -38,6 +39,57 @@ export const logoutAuth = async () => {
     await signOut(auth.getAuth());
 }
 
+export const updateUser = async (userId, dob, description, privacy, frequency) => {
+    await updateDoc(doc(db.getDB(), 'users', userId), {
+        description: description,
+        dob: Timestamp.fromDate(dob),
+        privacy: privacy,
+        frequency: frequency
+    })
+    return ""
+}
+
+export const changePassword = async (email, newpassword, oldpassword, userId, setLoading, setError, setPassword) => {
+    const user = auth.getAuth().currentUser
+    reauthenticateWithCredential(user, EmailAuthProvider.credential(email, oldpassword)).then(() => {
+        updatePassword(user, newpassword).then(async () => {
+            await updateDoc(doc(db.getDB(), 'users', userId), {
+                password: newpassword
+            })
+            console.log("updated")
+            setPassword(false)
+            setLoading(false)
+            return ""
+        }).catch((error)=> {
+            console.log(error)
+            setError("Update Error!") 
+            setLoading(false)
+        })
+    }).catch((error) => {
+        console.log(error)
+        setError("Update Error!") 
+        setLoading(false)
+    })
+}
+
+export const useUser = (userId, updater) => {
+    const [user, setUser] = useState()
+    useEffect(() => {
+        if (!userId) return
+      const loadData = async () => {
+        const userSnap = await getDoc(doc(db.getDB(), 'users', userId))
+        if (userSnap.exists()) {
+            setUser({
+                date_birth: convertToDate(userSnap.data().dob.toDate()),
+                ...userSnap.data()
+            })
+        }
+      }
+
+      loadData()
+    }, [userId, updater])
+    return user
+}
 
 export const useMentions = (userId) => {
     const [users, setUsers] = useState()

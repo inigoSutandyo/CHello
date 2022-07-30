@@ -13,6 +13,7 @@ import { GuestPage } from './views/pages/main/GuestPage';
 import { BoardPage } from './views/pages/main/BoardPage';
 import { KanbanPage } from './views/pages/main/KanbanPage';
 import { NotificationPage } from './views/pages/main/NotificationPage';
+import { Profile } from './views/pages/user/Profile';
 
 
 function App() {
@@ -43,11 +44,12 @@ function App() {
         </div>
       </nav>
       <Routes>
-        <Route path='/' element={<GuestPage/>} />
-        <Route path='/workspace' element={userSession!=null && <WorkspacePage userId={userSession.uid}/>} />
-        <Route path='/workspace/:workspaceId' element={userSession!=null && <BoardPage userId={userSession.uid}/>} />
-        <Route path='/board/:boardId' element={userSession!=null && <KanbanPage userId={userSession.uid}/>} />
-        <Route path='/invitations' element={userSession!=null && <NotificationPage userId={userSession.uid}/>} />
+        <Route path='/' element={userSession === null ? <GuestPage/> : <WorkspacePage userId={userSession.uid}/>} />
+        <Route path='/profile' element={userSession!==null && <Profile userId={userSession.uid}/>} />
+        <Route path='/workspace' element={userSession!==null && <WorkspacePage userId={userSession.uid}/>} />
+        <Route path='/workspace/:workspaceId' element={userSession!==null && <BoardPage userId={userSession.uid}/>} />
+        <Route path='/board/:boardId' element={userSession!==null && <KanbanPage userId={userSession.uid}/>} />
+        <Route path='/invitations' element={userSession!==null && <NotificationPage userId={userSession.uid}/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />
 

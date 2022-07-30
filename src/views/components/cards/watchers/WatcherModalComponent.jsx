@@ -9,9 +9,9 @@ const WatcherModalComponent = ({boardId, card}) => {
 
   return (
     <div>
-        {!members ? <p>Loading</p> : (
+        {!members || members.length === 0 ? <p>No Members Yet</p> : (
             members.map(m => (
-                <div className='d-flex flex-row'>
+                <div className='d-flex flex-row' key={m.uid}>
                     <p>{m.email}</p>
                     <button>Add</button>
                 </div>

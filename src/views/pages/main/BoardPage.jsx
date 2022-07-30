@@ -136,8 +136,6 @@ export const BoardPage = ({ userId }) => {
                 <button
                   className="btn btn-primary"
                   onClick={() => {
-                    // setIsModal(true);
-                    // setModalTitle("Join Workspace");
                     joinWorkspace(userId, workspaceId).then(() => setWorkspaceUpdater(workspaceUpdater+1))
                   }}
                   >
@@ -171,9 +169,7 @@ export const BoardPage = ({ userId }) => {
                     className="row g-2 mx-2 mt-5 p-1"
                     onSubmit={(e) => {
                       addNewBoard(e).then(() => {
-                          console.log("update!");
                           setUpdater(updater + 1);
-                          console.log(updater);
                       });
                     }}
                 >

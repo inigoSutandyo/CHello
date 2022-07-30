@@ -1,5 +1,6 @@
-import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { convertToDate } from "../util/DateTime";
 import { db } from "../util/FireBaseConfig";
 
 export const inviteUser = async (sourceId, memberEmail, spaceId, spaceType, memberType) => {
@@ -25,7 +26,8 @@ export const inviteUser = async (sourceId, memberEmail, spaceId, spaceType, memb
             destinationRef: destinationRef[0],
             spaceRef: spaceRef,
             membership: memberType,
-            spaceType: spaceType
+            spaceType: spaceType,
+            date: Timestamp.now()
         })
     }
     
@@ -37,7 +39,8 @@ export const notifyUser = async (userId, message) => {
     const userRef = doc(db.getDB(), "users", userId);
     await addDoc(collection(db.getDB(), 'notifications'), {
         target: userRef,
-        message: message
+        message: message,
+        date: Timestamp.now()
     })
 }
 
@@ -74,22 +77,48 @@ export const useNotification = (userId, updater) => {
       const notifList = []
       const loadData = async () => {
         const userRef = doc(db.getDB(), "users", userId);
+        const userSnap = await getDoc(userRef)
+        const user = userSnap.data()
+        
+
+        const freq = user.frequency ? user.frequency : "always"
+        if (freq === "never") {
+            setNotifications(null)
+            return
+        }
+        const lastNotif = user.lastnotif && freq === "periodically" ? convertToDate(user.lastnotif.toDate()) : null
+            
+        const now = Date.now()
+
         try {
             const q = query(collection(db.getDB(), 'notifications'));
             const querySnapshot = await getDocs(q);
-            // console.log(userRef)
+            
             querySnapshot.forEach((doc) => {
+
                 if (userRef.id == doc.data().target.id) {
-                    notifList.push({
-                        uid: doc.id,
-                        ...doc.data()
-                    })
+                    if (lastNotif !== null && Math.floor((now - lastNotif) / (1000*60*60*24)) >= 1) {
+                        notifList.push({
+                            uid: doc.id,
+                            ...doc.data()
+                        })
+                    } 
+                    if (lastNotif === null && freq === "always") {
+                        notifList.push({
+                            uid: doc.id,
+                            ...doc.data()
+                        })
+                    }
                 }
             });
         } catch (error) {
-            
+            console.log(error)
         }
-        
+        if (lastNotif !== null && notifList.length > 0) {
+            await updateDoc(userRef, {
+                lastnotif: Timestamp.now()
+            })    
+        }
         setNotifications(notifList)
       }
       loadData()
