@@ -13,6 +13,7 @@ export const ModalComponent = ({isModal, setIsModal, text, children, appElement}
       // className="Modal"
       // overlayClassName="Overlay"
       ariaHideApp={false}
+      style ={{overlay: {zIndex: 1000}}}
     >
       {/* <Dialog className='z-20 fade-in'> */}
         <div className="d-flex justify-content-between">

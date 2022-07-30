@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { VscAdd } from "react-icons/vsc";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -23,9 +23,11 @@ import { CardModalComponent } from "../../components/cards/CardModalComponent";
 import { CommentModalComponent } from "../../components/cards/comment/CommentModalComponent";
 import { LabelManagementComponent } from "../../components/cards/label/LabelManagementComponent";
 import { LabelModalComponent } from "../../components/cards/label/LabelModalComponent";
+import { Filter } from "../../components/Filter";
 import { KanbanListComponent } from "../../components/lists/KanbanListComponent";
 import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";
+import { SearchBar } from "../../components/SearchBar";
 
 export const KanbanPage = ({ userId }) => {
   const { boardId } = useParams();
@@ -38,8 +40,13 @@ export const KanbanPage = ({ userId }) => {
   const [cardUpdater, setCardUpdater] = useState(0);
   const [boardUpdater, setBoardUpdater] = useState(0);
   const [labelUpdater, setLabelUpdater] = useState(0)
+
+  const [searchList, setSearchList] = useState("")
+  const [searchCard, setSearchCard] = useState("")
+  const [filterLabel, setFilterLabel] = useState([])
+
   const board = useBoardById(boardId, userId, boardUpdater);
-  const kanbans = useKanban(board, listUpdater);
+  const kanbans = useKanban(board, listUpdater, searchList);
   const labels = useLabels(boardId, labelUpdater)
 
   useEffect(() => {
@@ -84,6 +91,28 @@ export const KanbanPage = ({ userId }) => {
     changeVisibilityBoard(boardId, visibility).then(
       initiateUpdateBoard()
     );
+  }
+
+  const handleFilterChange = (e) => {
+    const labelId = e.target.value
+    const flag = e.target.checked
+    // console.log(labelId, flag)
+
+    if (flag) {
+      const arr = []
+      filterLabel.forEach(id => {
+        arr.push(id)
+      });
+
+      arr.push(labelId)
+      setFilterLabel(arr)
+    } else {
+      const remove = filterLabel.filter((id) => {
+        return id !== labelId
+      })
+      setFilterLabel(remove)
+    }
+    // console.log(filterLabel)
   }
 
   return (
@@ -144,6 +173,8 @@ export const KanbanPage = ({ userId }) => {
             </div>
           )}
 
+          <SearchBar setSearchCard={setSearchCard} setSearchList={setSearchList} />
+          <Filter labels={labels} handleFilterChange={handleFilterChange}/>
           <ModalComponent
             isModal={isModal}
             setIsModal={setIsModal}
@@ -272,8 +303,10 @@ export const KanbanPage = ({ userId }) => {
                             listUpdater={listUpdater}
                             setListUpdater={setListUpdater}
                             cardUpdater={cardUpdater}
-                            setCardUpdater={setCardUpdater}
                             index={i}
+                            searchCard={searchCard}
+                            labels={labels}
+                            filter={filterLabel}
                           />
                         ))}
                         {provided.placeholder}

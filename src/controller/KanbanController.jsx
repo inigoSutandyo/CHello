@@ -5,9 +5,9 @@ import { useNavigate } from "react-router-dom"
 import { db } from "../util/FireBaseConfig"
 
 
-export const useKanban = (board, updater) => {
+export const useKanban = (board, updater, search) => {
     const [lists, setLists] = useState(null)
-
+    const [fixed, setFixed] = useState(null)
     useEffect(() => {
         if (board == null) {
             return;
@@ -26,6 +26,7 @@ export const useKanban = (board, updater) => {
                     })
                 })
                 setLists(listArr)
+                setFixed(listArr)
             }
         }
         
@@ -35,6 +36,17 @@ export const useKanban = (board, updater) => {
         }
     }, [updater])
 
+    useEffect(() => {
+
+        if (lists !== null) {
+            const result = fixed.filter(item => {
+                const term = search.toLowerCase()
+                return item.title.toLowerCase().startsWith(term)
+            })
+            // console.log(result)
+            setLists(result)
+        }
+    }, [search])
     // console.log(lists)
     return lists
 }

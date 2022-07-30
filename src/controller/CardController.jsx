@@ -6,9 +6,9 @@ import { db, storage } from "../util/FireBaseConfig"
 import { notifyUser } from "./InviteController"
 
 
-export const useCards = (kanbanId, board, cardUpdater) => {
+export const useCards = (kanbanId, board, cardUpdater, search, filter) => {
     const [cards, setCards] = useState(null)
-
+    const [fixed, setFixed] = useState(null)
     useEffect(() => {
         if (!kanbanId || !board) {
             return;
@@ -44,10 +44,40 @@ export const useCards = (kanbanId, board, cardUpdater) => {
                     }
                 })
                 setCards(cardArr)
+                setFixed(cardArr)
             }
         }
         loadData()
     }, [cardUpdater])
+    
+    useEffect(() => {
+        if (cards !== null) {
+            const result = fixed.filter(item => {
+                const term = search.toLowerCase()
+                return item.title.toLowerCase().startsWith(term)
+            })
+            setCards(result)
+        }
+    }, [search])
+    
+    useEffect(() => {
+        // console.log(filter)
+         if (cards !== null) {
+            if (filter.length !== 0) {
+                // console.log("hai")
+                const result = []
+                fixed.forEach(card => {
+                    if (card.label && filter.indexOf(card.label.id) !== -1) {
+                        result.push(card)
+                    }
+                });
+                // console.log(result)
+                setCards(result)
+            }  else {
+                setCards(fixed)
+            }
+        }
+    }, [filter])
     // console.log(cards)
     return cards
 }
@@ -273,6 +303,7 @@ export const useLabels = (boardId, cardUpdater) => {
       }
       loadData()
     }, [cardUpdater])
+    
     return labels
 }
 

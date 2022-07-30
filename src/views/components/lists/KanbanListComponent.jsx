@@ -15,8 +15,10 @@ export const KanbanListComponent = ({
   listUpdater,
   setListUpdater,
   cardUpdater,
-  setCardUpdater,
   index,
+  searchCard,
+  labels,
+  filter
 }) => {
   // console.log(kanban)
   return (
@@ -56,6 +58,9 @@ export const KanbanListComponent = ({
                     setKanban={setKanban}
                     cardUpdater={cardUpdater}
                     setModalTitle={setModalTitle}
+                    searchCard={searchCard}
+                    labels={labels}
+                    filter={filter}
                   />
                 </div>
                 <form
