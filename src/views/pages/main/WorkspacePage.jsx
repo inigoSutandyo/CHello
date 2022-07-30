@@ -6,6 +6,7 @@ import {
   useWorkspace,
 } from "../../../controller/WorkspaceController";
 import { LoadingComponent } from "../../components/LoadingComponent";
+import { SearchBar } from "../../components/SearchBar";
 import { WorkspaceListComponent } from "../../components/workspaces/WorkspaceListComponent";
 
 
@@ -18,8 +19,11 @@ export const WorkspacePage = ({ userId }) => {
     setUpdater(updater + 1);
   }, [userId]);
 
-  const workspaces = useWorkspace(sessionUser, updater);
-  const publicWorkspaces = usePublicWorkspace(workspaces)
+  const [searchWorkspace, setSearchWorkspace] = useState("")
+  const [searchBoard, setSearchBoard] = useState("")
+
+  const {workspaces, fixedWorkspaces} = useWorkspace(sessionUser, updater, searchWorkspace);
+  const publicWorkspaces = usePublicWorkspace(fixedWorkspaces, searchWorkspace)
   return (
     <>
       {workspaces == null || sessionUser == null ? (
@@ -30,6 +34,8 @@ export const WorkspacePage = ({ userId }) => {
             <div>
               <h3>My Workspaces</h3>
             </div>
+            <SearchBar setSearchOne={setSearchBoard} setSearchTwo={setSearchWorkspace} termOne={"Board"} termTwo={"Workspace"}/>
+
             <WorkspaceListComponent
               workspaces={workspaces}
               sessionUser={sessionUser}

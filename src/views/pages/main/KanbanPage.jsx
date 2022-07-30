@@ -194,7 +194,7 @@ export const KanbanPage = ({ userId }) => {
           <Link to={`/calendar/${board.uid}`} className="mb-2">
             <div className="btn btn-primary">Calendar View</div>
           </Link>
-          <SearchBar setSearchCard={setSearchCard} setSearchList={setSearchList} />
+          <SearchBar setSearchOne={setSearchCard} setSearchTwo={setSearchList} termOne={"Card"} termTwo={"List"}/>
           <Filter labels={labels} handleFilterChange={handleFilterChange}/>
           <ModalComponent
             isModal={isModal}

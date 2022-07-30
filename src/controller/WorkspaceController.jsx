@@ -16,8 +16,9 @@ import { useEffect, useState } from "react";
 import { db } from "../util/FireBaseConfig";
 import { createNotifications, notifyUser } from "./InviteController";
 
-export const useWorkspace = (userId, updater) => {
+export const useWorkspace = (userId, updater, search) => {
   const [workspace, setWorkspace] = useState(null);
+  const [fixed, setFixed] = useState(null);
 
   useEffect(() => {
     
@@ -61,6 +62,7 @@ export const useWorkspace = (userId, updater) => {
         }
 
         setWorkspace(documents);
+        setFixed(documents)
       } catch (e) {
         console.log(e);
       }
@@ -68,12 +70,25 @@ export const useWorkspace = (userId, updater) => {
     loadQuery();
   }, [updater]);
 
-  return workspace;
+
+  useEffect(() => {
+    if (workspace !== null) {
+      console.log(search)
+      const result = fixed.filter(item => {
+          const term = search.toLowerCase()
+          return item.name.toLowerCase().startsWith(term)
+      })
+      setWorkspace(result)
+    }
+  }, [search])
+  
+
+  return {workspaces: workspace, fixedWorkspaces: fixed};
 };
 
-export const usePublicWorkspace = (workspaces) => {
+export const usePublicWorkspace = (workspaces, search) => {
   const [publicSpace, setPublicSpace] = useState(null);
-
+  const [fixed, setFixed] = useState(null)
   useEffect(() => {
     
     if (workspaces == null) {
@@ -105,12 +120,24 @@ export const usePublicWorkspace = (workspaces) => {
           });
         }
         setPublicSpace(publicDocs);
+        setFixed(publicDocs)
       } catch (e) {
         console.log(e);
       }
     };
     loadQuery();
   }, [workspaces]);
+
+  useEffect(() => {
+    if (publicSpace !== null) {
+      console.log(search)
+      const result = fixed.filter(item => {
+          const term = search.toLowerCase()
+          return item.name.toLowerCase().startsWith(term)
+      })
+      setPublicSpace(result)
+    }
+  }, [search])
 
   return publicSpace;
 }
