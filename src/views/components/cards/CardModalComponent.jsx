@@ -4,10 +4,12 @@ import {
   addCheckList,
   addDueDate,
   addReminderDate,
+  assignWatcher,
   changeChecked,
   changeLabel,
   detachLabel,
   removeCheckList,
+  removeWatcher,
   updateDescription,
   updateTitle,
   useCardById,
@@ -23,8 +25,9 @@ import ProgressBar from "@ramonak/react-progress-bar";
 import { useMentions } from "../../../controller/UserController";
 import CommentComponent from "./comment/CommentComponent";
 import { convertToLocalDateTime } from "../../../util/DateTime";
-import { AiOutlineEye } from "react-icons/ai";
+import { AiFillEye, AiOutlineEye } from "react-icons/ai";
 import { IconContext } from "react-icons/lib";
+import { LoadingComponent } from "../LoadingComponent";
 
 export const CardModalComponent = ({
   cardId,
@@ -84,7 +87,6 @@ export const CardModalComponent = ({
     }
   }
 
-
   // console.log(card.reminder)
   return (
     <>
@@ -95,11 +97,28 @@ export const CardModalComponent = ({
             <div style={{
               cursor: "pointer"
             }}>
-              <IconContext.Provider
-                value={{size: '30px'}}
-              >
-                <AiOutlineEye />
-              </IconContext.Provider>
+              {card.watchersId.indexOf(userId) === -1 ? (
+                <IconContext.Provider
+                  value={{size: '30px'}}
+                >
+                  <AiOutlineEye onClick={() => {
+                    assignWatcher(userId, cardId, boardId).then(() => {
+                      initiateUpdateCard()
+                      // console.log(card.watchersId)
+                    })
+                  }} />
+                </IconContext.Provider>
+              ) : (
+                <IconContext.Provider
+                  value={{color: 'red', size: '30px'}}
+                >
+                  <AiFillEye onClick={() => {
+                    removeWatcher(userId, cardId, boardId).then(() => {
+                      initiateUpdateCard()
+                    })
+                  }}/>
+                </IconContext.Provider>
+              )}
             </div>
           </div>
           
@@ -234,8 +253,9 @@ export const CardModalComponent = ({
               </div>
             </div>
           ) : <></>}
+
         </div>
-      ) : <p>Card Not Found</p>}
+      ) : <LoadingComponent/>}
     </>
   );
 };

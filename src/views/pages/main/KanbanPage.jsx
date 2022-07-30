@@ -23,7 +23,6 @@ import { CardModalComponent } from "../../components/cards/CardModalComponent";
 import { CommentModalComponent } from "../../components/cards/comment/CommentModalComponent";
 import { LabelManagementComponent } from "../../components/cards/label/LabelManagementComponent";
 import { LabelModalComponent } from "../../components/cards/label/LabelModalComponent";
-import WatcherModalComponent from "../../components/cards/watchers/WatcherModalComponent";
 import { KanbanListComponent } from "../../components/lists/KanbanListComponent";
 import { LoadingComponent } from "../../components/LoadingComponent";
 import { ModalComponent } from "../../components/ModalComponent";

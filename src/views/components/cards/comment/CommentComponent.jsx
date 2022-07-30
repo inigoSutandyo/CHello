@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { IoSend } from "react-icons/io5";
 import { Mention, MentionsInput } from "react-mentions";
-import { addCardComment, mentionUser } from "../../../../controller/CardController";
+import { addCardComment, mentionUser, notifyWatchers } from "../../../../controller/CardController";
 
 export default class CommentComponent extends Component {
   constructor(props) {
@@ -44,6 +44,7 @@ export default class CommentComponent extends Component {
           onClick={() => {
             const content = document.getElementById("comment").value;
             addCardComment(this.props.card.uid, this.props.boardId, this.props.userId, content)
+            notifyWatchers(this.props.userId, this.props.card.uid, this.props.boardId)
             if (this.state.mentions.length !== 0) {
                 mentionUser(this.state.mentions, this.props.userId).then(console.log("mentioned"))
             }

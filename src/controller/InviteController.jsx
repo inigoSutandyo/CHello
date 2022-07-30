@@ -1,4 +1,4 @@
-import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { convertToDate } from "../util/DateTime";
 import { db } from "../util/FireBaseConfig";
@@ -58,6 +58,7 @@ export const useInvite = (userId, updater) => {
         querySnapshot.forEach((doc) => {
             inviteList.push({
                 uid: doc.id,
+                date: doc.data().date.toDate,
                 ...doc.data()
             })
         });
@@ -65,7 +66,7 @@ export const useInvite = (userId, updater) => {
       }
       loadData();
     }, [updater])
-    console.log(invites)
+    // console.log(invites)
     return invites
 }
   
@@ -91,7 +92,7 @@ export const useNotification = (userId, updater) => {
         const now = Date.now()
 
         try {
-            const q = query(collection(db.getDB(), 'notifications'));
+            const q = query(collection(db.getDB(), 'notifications'), orderBy('date', 'desc'));
             const querySnapshot = await getDocs(q);
             
             querySnapshot.forEach((doc) => {

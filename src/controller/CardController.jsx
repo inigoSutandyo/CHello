@@ -56,7 +56,7 @@ export const useCardById = (cardId, boardId, updater) => {
     const [card, setCard] = useState(null)
 
     useEffect(() => {
-      console.log(cardId)
+    //   console.log(cardId)
       if (!cardId || !boardId) return
       const loadData = async () => {
         const cardSnap = await getDoc(doc(db.getDB(), `boards/${boardId}/cards`,cardId))
@@ -79,7 +79,7 @@ export const useCardById = (cardId, boardId, updater) => {
         }
       }
       loadData()
-    }, [cardId])
+    }, [cardId, updater])
     // console.log(card)
     return card
 }
@@ -399,6 +399,7 @@ export const mentionUser = async (data, userId) => {
     const mentions = []
     if ( userSnap.exists()) {
         data.forEach(element => {
+            // prevent duplicates
             if (mentions.indexOf(element) === -1) {
                 mentions.push(element)
             }
@@ -504,25 +505,40 @@ export const useWatchers = (cardId, boardId) => {
     return watchers
 }
 
-export const useMembers = (boardId) => {
-    const [members, setMembers] = useState()
-    useEffect(() => {
-        if (!boardId) return;
-        const memberList= []
-        const loadData = async () => {
-            const boardSnap = await getDoc(doc(db.getDB(), `boards`, boardId))
-            if (boardSnap.exists()) {
-                const data = boardSnap.data()
-                if (data.members) {
-                    data.members.forEach(member => {
-                        memberList.push(member)
-                    });
-                }
-            }
-            setMembers(memberList)
-        }
-        loadData()
-    }, [boardId])
 
-    return members
+
+export const assignWatcher = async (userId, cardId, boardId) => {
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
+        watchers: arrayUnion(doc(db.getDB(), 'users', userId))
+    })
+}
+
+export const removeWatcher = async (userId, cardId, boardId) => {
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
+        watchers: arrayRemove(doc(db.getDB(), 'users', userId))
+    })
+    console.log(userId)
+}
+
+export const notifyWatchers = async (userId, cardId, boardId) => {
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+    const cardSnap = await getDoc(cardRef)
+    const userRef = doc(db.getDB(), `users`, userId)
+    const userSnap = await getDoc(userRef)
+    if ( userSnap.exists() && cardSnap.exists() && cardSnap.data().watchers && cardSnap.data().watchers.length > 0) {
+        const data = cardSnap.data().watchers
+        console.log(data)
+        const watchers = []
+        data.forEach(d => {
+            if (d.id !== userId) {
+                watchers.push(d.id)
+            }
+        });
+        const user = userSnap.data()
+        const message = `User ${user.email} commented on ${cardSnap.data().title}!`
+        watchers.forEach(mention => {
+            console.log(mention)
+            notifyUser(mention, message)
+        });        
+    }
 }
