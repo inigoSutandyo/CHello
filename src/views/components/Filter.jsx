@@ -1,4 +1,5 @@
 import React from "react";
+import { FaFilter } from "react-icons/fa";
 
 export const Filter = ({ labels, handleFilterChange }) => {
   return (
@@ -13,7 +14,7 @@ export const Filter = ({ labels, handleFilterChange }) => {
             aria-expanded="true"
             aria-controls="collapseOne"
           >
-            Filter
+            <FaFilter/>
           </button>
         </h2>
         <div

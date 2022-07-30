@@ -60,6 +60,7 @@ export const KanbanPage = ({ userId }) => {
   const onDragEnd = (result) => {
     console.log(result);
   };
+
   const navigate = useNavigate();
 
   const initiateUpdateBoard = () => {
@@ -149,7 +150,7 @@ export const KanbanPage = ({ userId }) => {
               {board.curr_membership === "admin" ? (
                 <div>
                   <button
-                    className="btn btn-primary mt-2"
+                    className="btn btn-primary my-2"
                     onClick={() => {
                       setIsModal(true);
                       setModalTitle("Label Management");
@@ -173,11 +174,11 @@ export const KanbanPage = ({ userId }) => {
             </div>
           )}
 
-          <SearchBar setSearchCard={setSearchCard} setSearchList={setSearchList} />
-          <Filter labels={labels} handleFilterChange={handleFilterChange}/>
-          <Link to={`/calendar/${board.uid}`} className="me-2">
+          <Link to={`/calendar/${board.uid}`} className="mb-2">
             <div className="btn btn-primary">Calendar View</div>
           </Link>
+          <SearchBar setSearchCard={setSearchCard} setSearchList={setSearchList} />
+          <Filter labels={labels} handleFilterChange={handleFilterChange}/>
           <ModalComponent
             isModal={isModal}
             setIsModal={setIsModal}

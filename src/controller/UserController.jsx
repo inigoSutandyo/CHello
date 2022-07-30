@@ -42,7 +42,7 @@ export const logoutAuth = async () => {
 export const updateUser = async (userId, dob, description, privacy, frequency) => {
     await updateDoc(doc(db.getDB(), 'users', userId), {
         description: description,
-        dob: Timestamp.fromDate(dob),
+        dob: dob ? Timestamp.fromDate(dob) : null,
         privacy: privacy,
         frequency: frequency
     })
@@ -79,8 +79,9 @@ export const useUser = (userId, updater) => {
       const loadData = async () => {
         const userSnap = await getDoc(doc(db.getDB(), 'users', userId))
         if (userSnap.exists()) {
+            const date_birth = userSnap.data().dob ? convertToDate(userSnap.data().dob.toDate()) : null
             setUser({
-                date_birth: convertToDate(userSnap.data().dob.toDate()),
+                date_birth: date_birth,
                 ...userSnap.data()
             })
         }
@@ -102,7 +103,8 @@ export const useMentions = (userId) => {
             if (docSnap) {
                 let i = 0
                 docSnap.forEach(doc => {
-                    if (doc.id != userId) {
+                    const privacy = doc.data().privacy ? doc.data().privacy : null
+                    if (doc.id != userId && privacy !== "private") {
                         data.push({
                             display: doc.data().email,
                             id: doc.id

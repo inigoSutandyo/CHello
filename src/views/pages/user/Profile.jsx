@@ -76,7 +76,7 @@ export const Profile = ({userId}) => {
                             const privacy = document.getElementById("privacy").value
                             const frequency = document.getElementById('frequency').value
                             const description = document.getElementById("desc-div").innerHTML
-                            const dob = new Date(document.getElementById("date").value)
+                            const dob = document.getElementById("date").value ? new Date(document.getElementById("date").value) : null
 
                             updateUser(userId, dob, description, privacy, frequency).then(() => {
                                 setUpdater(updater+1)
