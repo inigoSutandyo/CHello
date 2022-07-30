@@ -40,13 +40,14 @@ export const KanbanPage = ({ userId }) => {
   const [cardUpdater, setCardUpdater] = useState(0);
   const [boardUpdater, setBoardUpdater] = useState(0);
   const [labelUpdater, setLabelUpdater] = useState(0)
+  const [position, setPosition] = useState({destination: 0, source:0})
 
   const [searchList, setSearchList] = useState("")
   const [searchCard, setSearchCard] = useState("")
   const [filterLabel, setFilterLabel] = useState([])
 
   const board = useBoardById(boardId, userId, boardUpdater);
-  const kanbans = useKanban(board, listUpdater, searchList);
+  const kanbans = useKanban(board, listUpdater, searchList, position);
   const labels = useLabels(boardId, labelUpdater)
 
   useEffect(() => {
@@ -58,7 +59,23 @@ export const KanbanPage = ({ userId }) => {
   }, [board]);
 
   const onDragEnd = (result) => {
-    console.log(result);
+    const {destination, source, draggableId} = result
+    // console.log(destination, source, result.type)
+    if(!destination) return
+    if (result.type === "list") {
+      if (destination.index === source.index) return
+      setPosition({
+        destination: destination.index,
+        source: source.index
+      })
+      // const newColumnOrder = Array.from(initialData.columnOrder)
+      // newColumnOrder.splice(source.index, 1)
+      // newColumnOrder.splice(destination.index, 0, draggableId)
+      // setInitialData({...initialData, columnOrder: newColumnOrder})
+      // db.collection(`users/${userId}/boards/${boardId}/columns`)
+      //     .doc('columnOrder')
+      //     .update({order: newColumnOrder})
+    }
   };
 
   const navigate = useNavigate();
@@ -285,7 +302,7 @@ export const KanbanPage = ({ userId }) => {
                 <DragDropContext onDragEnd={onDragEnd}>
                   <Droppable
                     droppableId="allCols"
-                    type="column"
+                    type="list"
                     direction="horizontal"
                   >
                     {(provided) => (

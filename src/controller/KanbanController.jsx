@@ -1,11 +1,12 @@
 import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, Timestamp, updateDoc } from "firebase/firestore"
+import { list } from "firebase/storage"
 import { useEffect } from "react"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { db } from "../util/FireBaseConfig"
 
 
-export const useKanban = (board, updater, search) => {
+export const useKanban = (board, updater, search, position) => {
     const [lists, setLists] = useState(null)
     const [fixed, setFixed] = useState(null)
     useEffect(() => {
@@ -47,6 +48,26 @@ export const useKanban = (board, updater, search) => {
             setLists(result)
         }
     }, [search])
+
+    useEffect(() => {
+      if (position.destination === position.source) return
+      const dest = position.destination
+      const src = position.source
+
+      if (lists !== null) {
+        const arr = []
+        lists.forEach(d => {
+            arr.push(d)
+        });
+        const temp = arr[dest]
+        arr[dest] = arr[src] 
+        arr[src] = temp
+        setLists(arr)
+      }
+       
+    }, [position])
+    
+
     // console.log(lists)
     return lists
 }
