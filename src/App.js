@@ -14,6 +14,7 @@ import { BoardPage } from './views/pages/main/BoardPage';
 import { KanbanPage } from './views/pages/main/KanbanPage';
 import { NotificationPage } from './views/pages/main/NotificationPage';
 import { Profile } from './views/pages/user/Profile';
+import { CalendarPage } from './views/pages/main/CalendarPage';
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
         <Route path='/workspace' element={userSession!==null && <WorkspacePage userId={userSession.uid}/>} />
         <Route path='/workspace/:workspaceId' element={userSession!==null && <BoardPage userId={userSession.uid}/>} />
         <Route path='/board/:boardId' element={userSession!==null && <KanbanPage userId={userSession.uid}/>} />
+        <Route path='/calendar/:boardId' element={userSession!==null && <CalendarPage userId={userSession.uid}/>} />
         <Route path='/invitations' element={userSession!==null && <NotificationPage userId={userSession.uid}/>} />
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />

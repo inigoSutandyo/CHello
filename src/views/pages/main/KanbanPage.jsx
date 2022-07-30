@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { VscAdd } from "react-icons/vsc";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   changeMembershipBoard,
   changeVisibilityBoard,
@@ -175,6 +175,9 @@ export const KanbanPage = ({ userId }) => {
 
           <SearchBar setSearchCard={setSearchCard} setSearchList={setSearchList} />
           <Filter labels={labels} handleFilterChange={handleFilterChange}/>
+          <Link to={`/calendar/${board.uid}`} className="me-2">
+            <div className="btn btn-primary">Calendar View</div>
+          </Link>
           <ModalComponent
             isModal={isModal}
             setIsModal={setIsModal}

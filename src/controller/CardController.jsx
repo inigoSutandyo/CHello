@@ -30,7 +30,6 @@ export const useCards = (kanbanId, board, cardUpdater, search, filter) => {
 
             if (querySnapshot) {
                 querySnapshot.forEach((card) => {    
-          
                     if (refList.indexOf(card.id) != -1) {
                         const due = card.data().dueDate ? card.data().dueDate.toDate() : null
                         const reminder = card.data().reminderDate ? card.data().reminderDate.toDate() : null
@@ -80,6 +79,49 @@ export const useCards = (kanbanId, board, cardUpdater, search, filter) => {
     }, [filter])
     // console.log(cards)
     return cards
+}
+
+export const useCardCalendar = (boardId, userId) => {
+    const [events, setEvents] = useState(null)
+
+    useEffect(() => {
+      const main = []
+
+      const loadData = async () => {
+
+        const docSnap = await getDocs(collection(db.getDB(), `boards/${boardId}/cards`))
+        // console.log(docSnap)
+        if (docSnap) {
+            let id = 0
+            docSnap.forEach(doc => {
+                const data = doc.data()
+
+                if (data.dueDate) {
+                    main.push({
+                        id: id++,
+                        title: data.title,
+                        allDay: false,
+                        start: data.dueDate.toDate(),
+                        end: data.dueDate.toDate(),
+                    })
+                }
+                if (data.reminderDate) {
+                    main.push({
+                        id: id++,
+                        title: "Reminder " + data.title,
+                        allDay: false,
+                        start: data.reminderDate.toDate(),
+                        end: data.reminderDate.toDate(),
+                    })
+                }
+            });
+            setEvents(main)
+        }
+      }
+      loadData()
+    }, [boardId, userId])
+    // console.log(events)
+    return events
 }
 
 export const useCardById = (cardId, boardId, updater) => {
