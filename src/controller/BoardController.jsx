@@ -332,9 +332,13 @@ export const openBoard = async (boardId, workspaceId) => {
     })
 }
 
-export const useAllBoards = (userId, workspaces) => {
+export const useAllBoards = (userId, workspaces, search) => {
     const [boards, setBoards] = useState(null)
     const [closed, setClosed] = useState(null)
+
+    const [fixedOpen, setFixedOpen] = useState(null)
+    const [fixedClosed, setFixedClosed] = useState(null)
+
     useEffect(() => {
         if (!userId) return
         const boardList = []
@@ -364,8 +368,79 @@ export const useAllBoards = (userId, workspaces) => {
             }
             setBoards(boardList)
             setClosed(closedList)
+            setFixedOpen(boardList)
+            setFixedClosed(closedList)
         }
         loadData()
     }, [userId, workspaces])
+
+    useEffect(() => {
+        if (boards) {
+            const openResult = fixedOpen.filter(item => {
+                const term = search.toLowerCase()
+                return item.title.toLowerCase().startsWith(term)
+            })
+            setBoards(openResult)
+        }
+
+        if (closed) {
+            const closedResult = fixedClosed.filter(item => {
+                const term = search.toLowerCase()
+                return item.title.toLowerCase().startsWith(term)
+            })
+            setClosed(closedResult)
+        }
+    }, [search])
+    
+
     return {openBoards: boards, closedBoards: closed}
+}
+
+
+export const useFavoriteBoards = (userId, updater) => {
+    const [boards, setBoards] = useState(null)
+
+    useEffect(() => {
+      if (!userId) return
+      const boardList = []
+      const loadData = async () => {
+        const userRef = doc(db.getDB(), 'users', userId)
+        const userSnap = await getDoc(userRef)
+        if (userSnap) {
+            const favorites = userSnap.data().favorites
+            if (favorites && favorites.length > 0) {
+                const boardSnap = await getDocs(collection(db.getDB(), 'boards'))
+                if (boardSnap) {
+                    boardSnap.forEach(doc => {
+                        if (favorites.indexOf(doc.id) !== -1) {
+                            const data = doc.data()
+                            const membership = checkMembership(data, userRef)
+                            boardList.push({
+                                uid: doc.id,
+                                curr_membership: membership,
+                                ...data
+                            })
+                        }
+                    });
+                }
+            }
+            setBoards(boardList)
+        }
+      }
+      loadData()
+    }, [userId, updater])
+    return boards
+}
+
+export const changeFavorites = async (isFav, userId, boardId) => {
+    console.log(isFav)
+    if (isFav) {
+        await updateDoc(doc(db.getDB(), 'users', userId), {
+            favorites: arrayUnion(boardId)
+        })        
+    } else {
+        await updateDoc(doc(db.getDB(), 'users', userId), {
+            favorites: arrayRemove(boardId)
+        }) 
+    }
 }

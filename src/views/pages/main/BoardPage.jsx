@@ -4,6 +4,7 @@ import {
   addNewBoard,
   deleteBoard,
   useBoards,
+  useFavoriteBoards,
 } from "../../../controller/BoardController";
 import {
   changeMembership,
@@ -60,6 +61,12 @@ export const BoardPage = ({ userId }) => {
   };
 
   const navigate = useNavigate();
+  const [favoriteUpdater, setFavoriteUpdater] = useState(0)
+  const handleFavoriteUpdate = () => {
+    setFavoriteUpdater(favoriteUpdater+1)
+  }
+  const favorites = useFavoriteBoards(userId, favoriteUpdater)
+
   return (
     <>
       {boards != null && workspace != null && sessionUser != null ? (
@@ -176,12 +183,15 @@ export const BoardPage = ({ userId }) => {
               boards.map((b) => (
                 <BoardListComponent
                   board={b}
+                  userId = {userId}
+                  favorites = {favorites}
                   membership={workspace.curr_membership}
                   setModalTitle={setModalTitle}
                   setIsModal={setIsModal}
                   key={b.uid}
                   setSelectedBoard={setSelectedBoard}
                   setOpen={setOpen}
+                  handleFavoriteUpdate = {handleFavoriteUpdate}
                 />
               ))
             )}

@@ -26,7 +26,7 @@ export const WorkspaceListComponent = ({workspaces, addNewWorkSpace, sessionUser
                         </div>
                     ) : <></>}
                     <div className="card-body d-flex flex-column">
-                        <h4 className="card-title mb-3 text-wrap">{b.name}</h4>
+                        <h5 className="card-title mb-3 text-wrap">{b.name}</h5>
                         {/* <p className="card-text">Date Created : {b.datecreated}</p> */}
                         <Link to={`/workspace/${b.uid}`}>
                             <p className="btn btn-primary">
@@ -38,9 +38,9 @@ export const WorkspaceListComponent = ({workspaces, addNewWorkSpace, sessionUser
                 </div>
             )}
             {workspaces.length === 0 ? 
-                <h3 className='text-gray-700'>
+                <h4 className='text-gray-700'>
                     No Workspace created yet. Why don't you go ahead and create one?
-                </h3> : null}
+                </h4> : null}
         </div>
         {isMember ? (
             <div>
