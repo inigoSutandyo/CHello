@@ -48,7 +48,7 @@ export const ButtonGroup = ({
                     }}
                 >
                     <option value="public">Public</option>
-                    <option value="Private">Private</option>
+                    <option value="private">Private</option>
                 </select>
             </div>
         ) : <></>}

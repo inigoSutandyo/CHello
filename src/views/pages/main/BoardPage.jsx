@@ -26,11 +26,11 @@ export const BoardPage = ({ userId }) => {
   const [sessionUser, setSessionUser] = useState(userId);
   const [updater, setUpdater] = useState(0);
   const [workspaceUpdater, setWorkspaceUpdater] = useState(0);
-
+  const [selectedBoard, setSelectedBoard] = useState(null);
   const workspace = useWorkspaceById(workspaceId, userId, workspaceUpdater);
   useEffect(() => {
     setSessionUser(userId);
-    setWorkspaceUpdater(workspaceUpdater+1)
+    setWorkspaceUpdater(workspaceUpdater + 1);
   }, [userId]);
 
   useEffect(() => {
@@ -40,6 +40,10 @@ export const BoardPage = ({ userId }) => {
   const boards = useBoards(sessionUser, workspace, updater);
   const [isModal, setIsModal] = useState(false);
   const [modalTitle, setModalTitle] = useState();
+  const [open, setOpen] = useState(true)
+  const handleUpdateWorkspace = () => {
+    setWorkspaceUpdater(workspaceUpdater + 1);
+  };
 
   const handleMembershipChange = (userId) => {
     changeMembership(userId, workspaceId).then(() => {
@@ -55,18 +59,21 @@ export const BoardPage = ({ userId }) => {
     });
   };
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <>
       {boards != null && workspace != null && sessionUser != null ? (
         <div className="m-3" id="board-page">
           <div className="d-flex justify-content-start">
-            <div onClick={() => {
-              navigate(-1)
-            }} style={{
-              cursor: "pointer"
-            }}>
-              <FaArrowLeft/>
+            <div
+              onClick={() => {
+                navigate(-1);
+              }}
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              <FaArrowLeft />
             </div>
           </div>
           <div className="fs-3">
@@ -86,60 +93,74 @@ export const BoardPage = ({ userId }) => {
                   <button
                     className="btn btn-danger mx-1"
                     onClick={async () => {
-                      await removeUserWorkspace(userId,workspaceId).then(() => {
-                        setWorkspaceUpdater(workspaceUpdater+1)
-                      })
-                      navigate(-1)
+                      await removeUserWorkspace(userId, workspaceId).then(
+                        () => {
+                          setWorkspaceUpdater(workspaceUpdater + 1);
+                        }
+                      );
+                      navigate(-1);
                     }}
                   >
                     Leave Workspace
                   </button>
                 </div>
-                
+
                 <div className="mx-1 d-flex w-50">
-                  <label htmlFor="visibility" className="me-3">Visibility: </label>
-                  <select name="visibility" className="form-control" id="visibility" defaultValue={workspace.visibility} onChange = {() => {
-                    const visibility = document.getElementById("visibility").value
-                    changeVisibility(workspaceId, visibility).then(setWorkspaceUpdater(workspaceUpdater+1))
-                  }}>
+                  <label htmlFor="visibility" className="me-3">
+                    Visibility:{" "}
+                  </label>
+                  <select
+                    name="visibility"
+                    className="form-control"
+                    id="visibility"
+                    defaultValue={workspace.visibility}
+                    onChange={() => {
+                      const visibility =
+                        document.getElementById("visibility").value;
+                      changeVisibility(workspaceId, visibility).then(
+                        setWorkspaceUpdater(workspaceUpdater + 1)
+                      );
+                    }}
+                  >
                     <option value="public">Public</option>
-                    <option value="Private">Private</option>
+                    <option value="private">Private</option>
                   </select>
                 </div>
               </div>
-
             ) : workspace.curr_membership === "member" ? (
-                <div className="d-flex">
-                  <button
+              <div className="d-flex">
+                <button
                   className="btn btn-info"
                   onClick={() => {
                     setIsModal(true);
                     setModalTitle("Workspace Members");
                   }}
-                  >
-                    Members
-                  </button>
-                  <button
+                >
+                  Members
+                </button>
+                <button
                   className="btn btn-danger mx-2"
                   onClick={async () => {
-                    removeUserWorkspace(userId,workspaceId).then(() => {
-                      setWorkspaceUpdater(workspaceUpdater+1)
-                    })
-                    navigate(-1)
+                    removeUserWorkspace(userId, workspaceId).then(() => {
+                      setWorkspaceUpdater(workspaceUpdater + 1);
+                    });
+                    navigate(-1);
                   }}
-                  >
-                    Leave Workspace
-                  </button>
+                >
+                  Leave Workspace
+                </button>
               </div>
             ) : (
               <div>
                 <button
                   className="btn btn-primary"
                   onClick={() => {
-                    joinWorkspace(userId, workspaceId).then(() => setWorkspaceUpdater(workspaceUpdater+1))
+                    joinWorkspace(userId, workspaceId).then(() =>
+                      setWorkspaceUpdater(workspaceUpdater + 1)
+                    );
                   }}
-                  >
-                    Join Workspace
+                >
+                  Join Workspace
                 </button>
               </div>
             )}
@@ -152,50 +173,62 @@ export const BoardPage = ({ userId }) => {
                 No Boards created yet. Why don't you go ahead and create one?
               </h1>
             ) : (
-              boards.map((b) =>
+              boards.map((b) => (
                 <BoardListComponent
                   board={b}
                   membership={workspace.curr_membership}
-                  setModalTitle = {setModalTitle}
-                  setIsModal = {setIsModal}
+                  setModalTitle={setModalTitle}
+                  setIsModal={setIsModal}
                   key={b.uid}
+                  setSelectedBoard={setSelectedBoard}
+                  setOpen={setOpen}
                 />
-              )
+              ))
             )}
           </div>
           <div>
-            {workspace.curr_membership != "admin" ? <div></div> : (
-                <form
-                    className="row g-2 mx-2 mt-5 p-1"
-                    onSubmit={(e) => {
-                      addNewBoard(e).then(() => {
-                          setUpdater(updater + 1);
-                      });
-                    }}
-                >
-                    <input
-                        type="hidden"
-                        name="workSpaceId"
-                        id="workSpaceId"
-                        value={workspaceId}
-                    />
-                    <input type="hidden" name="userId" id="userId" value={sessionUser} />
-                    <div className="col-auto">
-                    <input
-                        required
-                        type="text"
-                        className="form-control"
-                        name="boardTitle"
-                        id="boardTitle"
-                        placeholder="Add Board"
-                    />
-                    </div>
-                    <div className="col-auto">
-                    <button type="submit" className="btn btn-primary mb-3 px-2 py-1">
-                        <VscAdd />
-                    </button>
-                    </div>
-                </form>
+            {workspace.curr_membership != "admin" ? (
+              <div></div>
+            ) : (
+              <form
+                className="row g-2 mx-2 mt-5 p-1"
+                onSubmit={(e) => {
+                  addNewBoard(e).then(() => {
+                    handleUpdateWorkspace();
+                  });
+                }}
+              >
+                <input
+                  type="hidden"
+                  name="workSpaceId"
+                  id="workSpaceId"
+                  value={workspaceId}
+                />
+                <input
+                  type="hidden"
+                  name="userId"
+                  id="userId"
+                  value={sessionUser}
+                />
+                <div className="col-auto">
+                  <input
+                    required
+                    type="text"
+                    className="form-control"
+                    name="boardTitle"
+                    id="boardTitle"
+                    placeholder="Add Board"
+                  />
+                </div>
+                <div className="col-auto">
+                  <button
+                    type="submit"
+                    className="btn btn-primary mb-3 px-2 py-1"
+                  >
+                    <VscAdd />
+                  </button>
+                </div>
+              </form>
             )}
           </div>
 
@@ -210,12 +243,19 @@ export const BoardPage = ({ userId }) => {
                 workSpace={workspace}
                 userId={userId}
                 handleMembershipChange={handleMembershipChange}
-                handleUserRemoval = {handleUserRemoval}
-                membership = {workspace.curr_membership}
+                handleUserRemoval={handleUserRemoval}
+                membership={workspace.curr_membership}
               />
             ) : modalTitle === "Board Detail" ? (
-              <BoardDetailComponent isOpen={true} currWorkspace={workspace}/>
-            ) : <div></div>}
+              <BoardDetailComponent
+                isOpen={open}
+                boardId={selectedBoard}
+                handleUpdateWorkspace={handleUpdateWorkspace}
+                setIsModal={setIsModal}
+              />
+            ) : (
+              <div></div>
+            )}
           </ModalComponent>
         </div>
       ) : (

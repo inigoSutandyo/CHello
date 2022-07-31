@@ -73,7 +73,7 @@ export const useWorkspace = (userId, updater, search) => {
 
   useEffect(() => {
     if (workspace !== null) {
-      console.log(search)
+
       const result = fixed.filter(item => {
           const term = search.toLowerCase()
           return item.name.toLowerCase().startsWith(term)
@@ -130,7 +130,7 @@ export const usePublicWorkspace = (workspaces, search) => {
 
   useEffect(() => {
     if (publicSpace !== null) {
-      console.log(search)
+
       const result = fixed.filter(item => {
           const term = search.toLowerCase()
           return item.name.toLowerCase().startsWith(term)
@@ -440,4 +440,34 @@ export const changeVisibility = async (workspaceId, visibility) => {
   await updateDoc(doc(db.getDB(), "workspaces", workspaceId), {
     visibility: visibility
   })
+}
+
+export const useBoardWorkspace = (boardId) => {
+  const [workspace, setWorkspace] = useState(null)
+  useEffect(() => {
+    const loadData = async () => {
+      if (!boardId) return
+      const workspaceSnap = await getDocs(collection(db.getDB(), 'workspaces')) 
+      if (workspaceSnap) {
+
+        workspaceSnap.forEach(doc => {
+          const data = doc.data()
+          if (data.boards) {
+            for (let i = 0; i < data.boards.length; i++) {
+              const boardRef = data.boards[i];
+              if (boardRef.id === boardId) {
+                setWorkspace({
+                  uid: doc.id,
+                  ...doc.data()
+                })
+                break;
+              }
+            }
+          }
+        });
+      }
+    }
+    loadData()
+  }, [boardId])
+  return workspace
 }

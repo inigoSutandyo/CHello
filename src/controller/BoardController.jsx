@@ -84,7 +84,9 @@ export const addNewBoard = async (e) => {
         title: title,
         datecreated: Timestamp.now(),
         admins: [],
-        members: []
+        members: [],
+        visibility: "public",
+        closed: false
     });
     await addListInBoard(boardRef.id)
     await addAdminBoard(boardRef.id,userId);
@@ -137,7 +139,8 @@ export const deleteBoard = async (boardId, workSpaceId) => {
     console.log("Deleting")
     const boardRef = doc(db.getDB(), 'boards', boardId)
 
-    await removeBoard(workSpaceId,boardRef)
+    if (workSpaceId) await removeBoard(workSpaceId,boardRef)
+    
     await deleteDoc(boardRef)
     return ""
 }
@@ -306,4 +309,63 @@ export const changeVisibilityBoard = async (boardId, visibility) => {
     await updateDoc(doc(db.getDB(), 'boards', boardId), {
         visibility: visibility
     })
+}
+
+export const moveBoard = async (boardId, fromId, toId) => {
+    const boardRef = doc(db.getDB(), 'boards', boardId)
+    
+    await updateDoc(doc(db.getDB(), 'workspaces', fromId), {
+        boards: arrayRemove(boardRef)
+    })
+    await updateDoc(doc(db.getDB(), 'workspaces', toId), {
+        boards: arrayUnion(boardRef)
+    })
+}
+
+export const openBoard = async (boardId, workspaceId) => {
+    const boardRef = doc(db.getDB(), 'boards', boardId)
+    await updateDoc(boardRef, {
+        closed: false
+    })
+    await updateDoc(doc(db.getDB(), 'workspaces', workspaceId), {
+        boards: arrayUnion(boardRef)
+    })
+}
+
+export const useAllBoards = (userId, workspaces) => {
+    const [boards, setBoards] = useState(null)
+    const [closed, setClosed] = useState(null)
+    useEffect(() => {
+        if (!userId) return
+        const boardList = []
+        const closedList = []
+        const userRef = doc(db.getDB(), 'users', userId)
+        const loadData = async () => {
+            const boardSnap = await getDocs(collection(db.getDB(), 'boards'))
+            if (boardSnap) {
+                boardSnap.forEach(board => {
+                    const data = board.data()
+    
+                    const membership = checkMembership(data, userRef)
+                    if (membership !== "none" && data.closed === false) {
+                        boardList.push({
+                            uid: board.id,
+                            curr_membership: membership,
+                            ...data
+                        })
+                    } else if (data.closed === true && membership === "admin") {
+                        closedList.push({
+                            uid: board.id,
+                            curr_membership: membership,
+                            ...data
+                        })
+                    }
+                });
+            }
+            setBoards(boardList)
+            setClosed(closedList)
+        }
+        loadData()
+    }, [userId, workspaces])
+    return {openBoards: boards, closedBoards: closed}
 }
