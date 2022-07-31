@@ -20,7 +20,12 @@ export const KanbanListComponent = ({
   labels,
   filter
 }) => {
-  // console.log(kanban)
+  const getItemStyle = (isDragging, draggableStyle) => ({
+    userSelect: 'none',
+    background: isDragging ? 'lightgreen' : 'white',
+
+    ...draggableStyle,
+  });
   return (
     <div>
      
@@ -28,12 +33,12 @@ export const KanbanListComponent = ({
         <div></div>
       ) : (
         <Draggable draggableId={kanban.uid} index={index} key={kanban.uid}>
-          {provided => 
+          {(provided, snapshot) => 
             <div
               {...provided.draggableProps} 
               ref={provided.innerRef}
               className="card card-border-primary mx-3"
-              style={{ flex: "0 0 20rem" }}
+              style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
             >
               <div {...provided.dragHandleProps}>
                 <div className="card-header">

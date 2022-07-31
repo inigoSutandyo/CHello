@@ -78,6 +78,26 @@ export const KanbanPage = ({ userId }) => {
     }
   };
 
+  // const getItemStyle = (isDragging, draggableStyle) => ({
+  //   // some basic styles to make the items look a bit nicer
+  //   userSelect: 'none',
+  //   padding: grid * 2,
+  //   margin: `0 ${grid}px 0 0`,
+  
+  //   // change background colour if dragging
+  //   background: isDragging ? 'lightgreen' : 'grey',
+  
+  //   // styles we need to apply on draggables
+  //   ...draggableStyle,
+  // });
+  
+  const getListStyle = isDraggingOver => ({
+    background: isDraggingOver ? 'lightblue' : 'lightgrey',
+    display: 'flex',
+    padding: 8,
+    overflow: 'auto',
+  });
+
   const navigate = useNavigate();
 
   const initiateUpdateBoard = () => {
@@ -305,10 +325,11 @@ export const KanbanPage = ({ userId }) => {
                     type="list"
                     direction="horizontal"
                   >
-                    {(provided) => (
+                    {(provided, snapshot) => (
                       <div
                         {...provided.droppableProps}
                         ref={provided.innerRef}
+                        style={getListStyle(snapshot.isDraggingOver)}
                         className="overflow d-flex"
                       >
                         {kanbans.map((k, i) => (
