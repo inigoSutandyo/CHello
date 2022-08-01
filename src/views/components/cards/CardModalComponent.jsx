@@ -7,6 +7,7 @@ import {
   assignWatcher,
   changeChecked,
   changeLabel,
+  deleteCard,
   detachLabel,
   removeCheckList,
   removeWatcher,
@@ -29,6 +30,8 @@ import { AiFillEye, AiOutlineEye } from "react-icons/ai";
 import { IconContext } from "react-icons/lib";
 import { LoadingComponent } from "../LoadingComponent";
 import { MapCard } from "./map/MapCard";
+// const electron = window.require('electron')
+
 
 export const CardModalComponent = ({
   cardId,
@@ -39,6 +42,7 @@ export const CardModalComponent = ({
   labels,
   userId,
   setModalTitle,
+  setIsModal,
 }) => {
   const card = useCardById(cardId, boardId, cardUpdater)
   const [checkUpdater, setCheckUpdater] = useState(0)
@@ -106,7 +110,6 @@ export const CardModalComponent = ({
                     <AiOutlineEye onClick={() => {
                       assignWatcher(userId, cardId, boardId).then(() => {
                         initiateUpdateCard()
-                        // console.log(card.watchersId)
                       })
                     }} />
                   </IconContext.Provider>
@@ -124,7 +127,12 @@ export const CardModalComponent = ({
               </div>
             </div>
             <div>
-              <button className="btn btn-danger">Delete</button>
+              <button className="btn btn-danger" onClick={() => {
+                deleteCard(card.uid, boardId).then(() => {
+                  setIsModal(false)
+                  initiateUpdateCard()
+                })
+              }}>Delete</button>
             </div>
           </div>
           

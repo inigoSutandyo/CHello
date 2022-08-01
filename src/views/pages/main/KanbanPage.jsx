@@ -232,6 +232,7 @@ export const KanbanPage = ({ userId }) => {
                 initiateUpdateCard = {initiateUpdateCard}
                 userId={userId}
                 setModalTitle={setModalTitle}
+                setIsModal={setIsModal}
               />
             ) : modalTitle == "Comments" ? (
               <CommentModalComponent

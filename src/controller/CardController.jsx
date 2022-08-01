@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { useState } from "react"
 import { db, storage } from "../util/FireBaseConfig"
 import { notifyUser } from "./InviteController"
+import { removeCardFromList } from "./KanbanController"
 
 
 export const useCards = (kanbanId, board, cardUpdater, search, filter) => {
@@ -620,4 +621,19 @@ export const updateLocation = async (cardId, boardId, coords) => {
     await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
         location: coords
     })
+}
+
+// TODO: not the best implementation to delete a card in a list 
+export const deleteCard = async (cardId, boardId) => {
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+    const listSnap = await getDocs(collection(db.getDB(), `boards/${boardId}/lists`))
+    if (listSnap) {
+        listSnap.forEach((doc) => {
+            const data = doc.data()
+            if (data.cards.indexOf(cardRef) !== -1) {
+                removeCardFromList(cardRef, doc.id, boardId)
+            }
+        })
+    }
+    await deleteDoc(cardRef)
 }

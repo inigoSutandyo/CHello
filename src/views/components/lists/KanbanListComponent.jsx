@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { KanbanCardComponent } from "../cards/KanbanCardComponent";
 import { VscAdd } from "react-icons/vsc";
-import { updateTitleList } from "../../../controller/KanbanController";
+import { deleteList, updateTitleList } from "../../../controller/KanbanController";
 import { Draggable } from "react-beautiful-dnd";
+import { IconContext } from "react-icons/lib";
+import { FaWindowClose } from "react-icons/fa";
 
 export const KanbanListComponent = ({
   kanban,
@@ -41,7 +43,7 @@ export const KanbanListComponent = ({
               style={getItemStyle(snapshot.isDragging, provided.draggableProps.style)}
             >
               <div {...provided.dragHandleProps}>
-                <div className="card-header">
+                <div className="card-header d-flex justify-content-between">
                   <input
                     type="text"
                     className="card-title p-2"
@@ -53,6 +55,14 @@ export const KanbanListComponent = ({
                       }
                     }}
                   />
+                  <IconContext.Provider value={{
+                    color: "red",
+                    size: "20px"
+                  }}>
+                    <FaWindowClose style={{cursor: "pointer"}} onClick = {() => {
+                      deleteList(kanban.uid, board.uid).then(setListUpdater(listUpdater + 1))
+                    }}/>
+                  </IconContext.Provider>
                 </div>
                 <div className="card-body p-3">
                   <KanbanCardComponent

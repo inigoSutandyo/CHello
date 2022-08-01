@@ -7,8 +7,6 @@ const loadTemplate = isDev
 : `file://${path.join(__dirname, '../build/index.html')}`
 
 function createWindow() {
-  // Create the browser window.
-  // const appIcon = new Tray('../assets/images/logo.png')
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -21,8 +19,6 @@ function createWindow() {
 
   console.log(win)
 
-  // and load the index.html of the app.
-  // win.loadFile("index.html");
   win.loadURL(
     loadTemplate
   );
@@ -30,25 +26,6 @@ function createWindow() {
   if (isDev) {
     win.webContents.openDevTools();
   }
-
-  // win.setOverlayIcon(path.join(__dirname, '../assets/images/logo.png'), 'Overlay Icon Description');
-    
-  // setTimeout(() => {
-  //     win.setOverlayIcon(null, '');
-  // }, 5000);
-
-  // win.setThumbarButtons([
-  //   {
-  //     tooltip: 'cat 1',
-  //     icon: path.join(__dirname, '../assets/images/logo.png'),
-  //     click() { console.log('cat 1 clicked') }
-  //   }, {
-  //     tooltip: 'cat 2',
-  //     // icon: path.join(__dirname, 'cat.jpg'),
-  //     flags: ['enabled', 'dismissonclick'],
-  //     click() { console.log('cat 2 clicked.') }
-  //   }
-  // ])
 }
 
 app.whenReady().then(() => {

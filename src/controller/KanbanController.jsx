@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, query, Timestamp, updateDoc } from "firebase/firestore"
+import { addDoc, arrayRemove, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, Timestamp, updateDoc } from "firebase/firestore"
 import { list } from "firebase/storage"
 import { useEffect } from "react"
 import { useState } from "react"
@@ -102,4 +102,14 @@ export const updateTitleList = async (title, listId, boardId) => {
     await updateDoc(doc(db.getDB(), `boards/${boardId}/lists`,listId), {
         title: title
     })
+}
+
+export const removeCardFromList = async (cardRef, listId, boardId) => {
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/lists`, listId), {
+        cards: arrayRemove(cardRef)
+    })
+}
+
+export const deleteList = async (listId, boardId) => {
+    await deleteDoc(doc(db.getDB(), `boards/${boardId}/lists`, listId))
 }
