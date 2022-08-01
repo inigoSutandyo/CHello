@@ -4,6 +4,7 @@ import { useWorkspaceUsers } from "../../../controller/WorkspaceController";
 import { VscAdd } from "react-icons/vsc";
 import { MemberComponent } from "../MemberComponent";
 import { useBoardUsers } from "../../../controller/BoardController";
+import CopyToClipboard from "react-copy-to-clipboard";
 
 export const BoardMembershipComponent = ({
   board,
@@ -65,38 +66,51 @@ export const BoardMembershipComponent = ({
           ))}
         </div>
       )}
-      <div className="row g-2 mx-2 mt-5 p-1">
-        <div className="col-auto">
-          <input
-            required
-            type="email"
-            className="form-control"
-            name="memberEmail"
-            id="memberEmail"
-            placeholder="Add Member"
-          />
-        </div>
-        <div className="col-auto">
-          <button
-            type="submit"
-            className="btn btn-primary mb-3 px-2 py-1"
-            onClick={() => {
-              const memberEmail = document.getElementById("memberEmail").value;
-              console.log(board.uid);
-              inviteUser(
-                userId,
-                memberEmail,
-                board.uid,
-                "boards",
-                "member"
-              );
-              document.getElementById("memberEmail").value = "";
-            }}
-          >
-            <VscAdd />
-          </button>
-        </div>
-      </div>
+      {membership === "admin" ? (
+        <>
+          <div className="row g-2 mx-2 mt-5 p-1">
+            <div className="col-auto">
+              <input
+                required
+                type="email"
+                className="form-control"
+                name="memberEmail"
+                id="memberEmail"
+                placeholder="Add Member"
+              />
+            </div>
+            <div className="col-auto">
+              <button
+                type="submit"
+                className="btn btn-primary mb-3 px-2 py-1"
+                onClick={() => {
+                  const memberEmail = document.getElementById("memberEmail").value;
+                  console.log(board.uid);
+                  inviteUser(
+                    userId,
+                    memberEmail,
+                    board.uid,
+                    "boards",
+                    "member"
+                  );
+                  document.getElementById("memberEmail").value = "";
+                }}
+              >
+                <VscAdd />
+              </button>
+            </div>
+          </div>
+          <div className="row g-2 mx-2 p-1">
+              <div className="col-auto"> 
+                <CopyToClipboard text={`localhost:3000/joinbd/${board.uid}`}>
+                  <button className="btn btn-outline-info">
+                    Get Invite Link
+                  </button>
+                </CopyToClipboard>
+              </div>
+          </div>
+        </>
+      ) : <></>}
     </div>
   );
 };

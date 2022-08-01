@@ -15,7 +15,8 @@ import { KanbanPage } from './views/pages/main/KanbanPage';
 import { NotificationPage } from './views/pages/main/NotificationPage';
 import { Profile } from './views/pages/user/Profile';
 import { CalendarPage } from './views/pages/main/CalendarPage';
-
+import {JoinWorkspacePage} from './views/pages/main/JoinWorkspacePage'
+import { JoinBoardPage } from './views/pages/main/JoinBoardPage';
 
 function App() {
   const [userSession, setUserSession] = useState({})
@@ -51,6 +52,8 @@ function App() {
         <Route path='/board/:boardId' element={userSession!==null && <KanbanPage userId={userSession.uid}/>} />
         <Route path='/calendar/:boardId' element={userSession!==null && <CalendarPage userId={userSession.uid}/>} />
         <Route path='/invitations' element={userSession!==null && <NotificationPage userId={userSession.uid}/>} />
+        <Route path='/joinws/:workspaceId' element={<JoinWorkspacePage userSession={userSession}/>}/>
+        <Route path='/joinbd/:boardId' element={<JoinBoardPage userSession={userSession}/>}/>
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />
 

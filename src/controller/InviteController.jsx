@@ -16,7 +16,8 @@ export const inviteUser = async (sourceId, memberEmail, spaceId, spaceType, memb
     querySnapshot.forEach((document) => {
         if (document.data().privacy && document.data().privacy === "public") {
             destinationRef.push(doc(db.getDB(), "users", document.id))
-        } else if (!document.data().privacy) {
+        } 
+        if (!document.data().privacy) {
             destinationRef.push(doc(db.getDB(), "users", document.id))
         }
     });

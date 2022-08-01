@@ -35,6 +35,22 @@ export const loginAuth = async (email, password) =>{
     }
 }
 
+export const loginGetId = async (email, password) =>{
+    try {
+        const user = await signInWithEmailAndPassword(auth.getAuth(), email, password)
+        console.log(user.user.uid)
+        return {
+            error: false,
+            uid: user.user.uid
+        }
+    } catch (error) {
+        return {
+            error: true,
+            msg: 'Login failed, user not found!'
+        };
+    }
+}
+
 export const logoutAuth = async () => {
     await signOut(auth.getAuth());
 }
