@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom"
 import { db } from "../util/FireBaseConfig"
 
 
-export const useKanban = (board, updater, search, position) => {
+export const useKanban = (board, updater, search, position, cardPosition) => {
     const [lists, setLists] = useState(null)
     const [fixed, setFixed] = useState(null)
     useEffect(() => {
@@ -67,6 +67,41 @@ export const useKanban = (board, updater, search, position) => {
        
     }, [position])
     
+    useEffect(() => {
+        if (lists === null) return
+        const arr = []
+        let srcId = ""
+        let dstId = ""
+        for (let i = 0; i < lists.length; i++) {
+            const element = lists[i];
+            if (i === cardPosition.destinationCard) {
+                dstId = element.uid
+            }
+
+            if (i === cardPosition.sourceCard) {
+                srcId = element.uid
+            }
+            arr.push(element)
+        }
+        if (cardPosition.sameList) {
+            const dest = cardPosition.destinationCard
+            const src = cardPosition.sourceCard
+            const cards = arr[cardPosition.sourceList].cards
+            const temp = cards[dest]
+            cards[dest] = cards[src] 
+            cards[src] = temp
+            // console.log(cards)
+            // const updatePosition = async () => {
+            //     await updateDoc(doc(db.getDB(), `boards/${board.uid}/lists`, srcId), {
+            //         cards: cards
+            //     })
+            // }
+            // updatePosition()
+            arr[cardPosition.sourceList].cards = cards
+            setLists(arr)
+            
+        }
+    }, [cardPosition])
 
     // console.log(lists)
     return lists

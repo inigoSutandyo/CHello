@@ -40,14 +40,22 @@ export const KanbanPage = ({ userId }) => {
   const [cardUpdater, setCardUpdater] = useState(0);
   const [boardUpdater, setBoardUpdater] = useState(0);
   const [labelUpdater, setLabelUpdater] = useState(0)
-  const [position, setPosition] = useState({destination: 0, source:0})
+
+  const [listPosition, setListPosition] = useState({destination: 0, source:0})
+  const [cardPosition, setCardPosition] = useState({
+    destinationList: 0,
+    sourceList: 0,
+    destinationCard: 0,
+    sourceCard: 0,
+    sameList: true
+  })
 
   const [searchList, setSearchList] = useState("")
   const [searchCard, setSearchCard] = useState("")
   const [filterLabel, setFilterLabel] = useState([])
 
   const board = useBoardById(boardId, userId, boardUpdater);
-  const kanbans = useKanban(board, listUpdater, searchList, position);
+  const kanbans = useKanban(board, listUpdater, searchList, listPosition, cardPosition);
   const labels = useLabels(boardId, labelUpdater)
 
   useEffect(() => {
@@ -58,38 +66,53 @@ export const KanbanPage = ({ userId }) => {
     setListUpdater(listUpdater + 1);
   }, [board]);
 
+
+
   const onDragEnd = (result) => {
     const {destination, source, draggableId} = result
     // console.log(destination, source, result.type)
     if(!destination) return
+
     if (result.type === "list") {
       if (destination.index === source.index) return
-      setPosition({
+      setListPosition({
         destination: destination.index,
         source: source.index
       })
-      // const newColumnOrder = Array.from(initialData.columnOrder)
-      // newColumnOrder.splice(source.index, 1)
-      // newColumnOrder.splice(destination.index, 0, draggableId)
-      // setInitialData({...initialData, columnOrder: newColumnOrder})
-      // db.collection(`users/${userId}/boards/${boardId}/columns`)
-      //     .doc('columnOrder')
-      //     .update({order: newColumnOrder})
+    } else {
+      // console.log(result)
+      let srcIndex = 0
+      let dstIndex = 0
+      for (let i = 0; i < kanbans.length; i++) {
+        if (kanbans[i].uid === source.droppableId) {
+          srcIndex = i
+        } 
+        if (kanbans[i].uid === destination.droppableId) {
+          dstIndex = i
+        }
+      
+      }
+
+      // console.log(srcIndex, dstIndex)
+      // const srcList = kanbans.filter((k)=> {return k.uid === source.droppableId})[0]
+      // const destList = kanbans.filter((k)=> {return k.uid === destination.droppableId})[0]
+
+      if (srcIndex === dstIndex) {
+        if (source.index === destination.index) return
+
+        // console.log("same list")
+        setCardPosition({
+          destinationList: dstIndex,
+          sourceList: srcIndex,
+          destinationCard: destination.index,
+          sourceCard: source.index,
+          sameList: true
+        })
+        return
+      }
     }
   };
 
-  // const getItemStyle = (isDragging, draggableStyle) => ({
-  //   // some basic styles to make the items look a bit nicer
-  //   userSelect: 'none',
-  //   padding: grid * 2,
-  //   margin: `0 ${grid}px 0 0`,
-  
-  //   // change background colour if dragging
-  //   background: isDragging ? 'lightgreen' : 'grey',
-  
-  //   // styles we need to apply on draggables
-  //   ...draggableStyle,
-  // });
   
   const getListStyle = isDraggingOver => ({
     background: isDraggingOver ? 'lightblue' : 'lightgrey',

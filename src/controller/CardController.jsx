@@ -7,17 +7,17 @@ import { notifyUser } from "./InviteController"
 import { removeCardFromList } from "./KanbanController"
 
 
-export const useCards = (kanbanId, board, cardUpdater, search, filter) => {
+export const useCards = (kanban, board, cardUpdater, search, filter) => {
     const [cards, setCards] = useState(null)
     const [fixed, setFixed] = useState(null)
     useEffect(() => {
-        if (!kanbanId || !board) {
+        if (!kanban || !board) {
             return;
         }
 
         const loadData = async () => {
 
-            const docSnap = await getDoc(doc(db.getDB(), `boards/${board.uid}/lists`, kanbanId))
+            const docSnap = await getDoc(doc(db.getDB(), `boards/${board.uid}/lists`, kanban.uid))
             if (!docSnap.data().cards) {
                 return
             }

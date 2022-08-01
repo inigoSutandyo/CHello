@@ -76,6 +76,7 @@ export const KanbanListComponent = ({
                     searchCard={searchCard}
                     labels={labels}
                     filter={filter}
+                    kanbanIndex = {index}
                   />
                 </div>
                 <form
