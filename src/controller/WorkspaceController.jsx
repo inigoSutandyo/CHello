@@ -13,6 +13,8 @@ import {
   where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { createNewWorkspace, createWorkspace } from "../factory/WorkspaceFactory";
+import Workspace from "../model/Workspace";
 import { db } from "../util/FireBaseConfig";
 import { createNotifications, notifyUser } from "./InviteController";
 
@@ -222,15 +224,8 @@ export const addNewWorkspace = async (e) => {
     return ""
   }
   const userRef = doc(db.getDB(), "users", userId);
-
-  const docRef = await addDoc(collection(db.getDB(), "workspaces"), {
-    name: name,
-    datecreated: Timestamp.now(),
-    admins: [userRef],
-    members: [],
-    boards: [],
-    visibility: "public",
-  });
+  const newWorkspace = createNewWorkspace([userRef], name, Timestamp.now()).toDictionary()
+  const docRef = await addDoc(collection(db.getDB(), "workspaces"), newWorkspace);
 
   console.log(docRef);
 

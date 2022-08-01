@@ -1,5 +1,6 @@
 import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, Timestamp, updateDoc, where } from "firebase/firestore"
 import { useEffect, useState } from "react"
+import { createNewBoard } from "../factory/BoardFactory"
 import { db } from "../util/FireBaseConfig"
 import { addTemplateList } from "./KanbanController"
 import { addBoard, removeBoard } from "./WorkspaceController"
@@ -80,14 +81,8 @@ export const addNewBoard = async (e) => {
     const workSpaceId = e.target.elements.workSpaceId.value
     const userId = e.target.elements.userId.value
 
-    const boardRef = await addDoc(collection(db.getDB(), "boards"), {
-        title: title,
-        datecreated: Timestamp.now(),
-        admins: [],
-        members: [],
-        visibility: "public",
-        closed: false
-    });
+    const newBoard = createNewBoard(title, Timestamp.now()).toDictionary()
+    const boardRef = await addDoc(collection(db.getDB(), "boards"), newBoard);
     await addListInBoard(boardRef.id)
     await addAdminBoard(boardRef.id,userId);
     await addBoard(workSpaceId, boardRef);

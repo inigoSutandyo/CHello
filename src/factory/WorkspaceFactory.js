@@ -1,4 +1,6 @@
-export const createWorkspace = (admins, name) => {
+import Workspace from "../model/Workspace"
 
-    return new Workspace(admins, [], [], name, "public")
+export const createNewWorkspace = (admins, name, datecreated) => {
+
+    return new Workspace(admins, [], [], name, "public", datecreated)
 }
