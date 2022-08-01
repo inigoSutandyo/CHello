@@ -24,7 +24,10 @@ export const DropComponent = ({cardId, boardId, setCardUpdater, cardUpdater}) =>
     maxSize: 5000000,
     maxFiles: 3,
     onDropAccepted: function () {  
-        if (!acceptedFiles) return
+        if (!acceptedFiles) {
+            console.log("no file")
+            return
+        }
 
         if (acceptedFiles.length > 0) {
             setLoading(true)
@@ -40,7 +43,7 @@ export const DropComponent = ({cardId, boardId, setCardUpdater, cardUpdater}) =>
 
   useEffect(() => {
     setUpdater(updater+1)
-  }, [cardId])
+  }, [cardId, cardUpdater])
   
   const files = useFiles(cardId, boardId, updater)
 

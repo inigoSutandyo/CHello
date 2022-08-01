@@ -615,3 +615,9 @@ export const notifyWatchers = async (userId, cardId, boardId) => {
         });        
     }
 }
+
+export const updateLocation = async (cardId, boardId, coords) => {
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/cards`, cardId), {
+        location: coords
+    })
+}

@@ -28,6 +28,7 @@ import { convertToLocalDateTime } from "../../../util/DateTime";
 import { AiFillEye, AiOutlineEye } from "react-icons/ai";
 import { IconContext } from "react-icons/lib";
 import { LoadingComponent } from "../LoadingComponent";
+import { MapCard } from "./map/MapCard";
 
 export const CardModalComponent = ({
   cardId,
@@ -92,33 +93,38 @@ export const CardModalComponent = ({
     <>
       {card ? (
         <div className="m-3">
-          <div className="mb-3 d-flex justify-content-start align-items-center">
-            <label className="me-2">Watcher</label>
-            <div style={{
-              cursor: "pointer"
-            }}>
-              {card.watchersId.indexOf(userId) === -1 ? (
-                <IconContext.Provider
-                  value={{size: '30px'}}
-                >
-                  <AiOutlineEye onClick={() => {
-                    assignWatcher(userId, cardId, boardId).then(() => {
-                      initiateUpdateCard()
-                      // console.log(card.watchersId)
-                    })
-                  }} />
-                </IconContext.Provider>
-              ) : (
-                <IconContext.Provider
-                  value={{color: 'red', size: '30px'}}
-                >
-                  <AiFillEye onClick={() => {
-                    removeWatcher(userId, cardId, boardId).then(() => {
-                      initiateUpdateCard()
-                    })
-                  }}/>
-                </IconContext.Provider>
-              )}
+          <div className="d-flex justify-content-between mb-3">
+            <div className="d-flex justify-content-start align-items-center">
+              <label className="me-2">Watcher</label>
+              <div style={{
+                cursor: "pointer"
+              }}>
+                {card.watchersId.indexOf(userId) === -1 ? (
+                  <IconContext.Provider
+                    value={{size: '30px'}}
+                  >
+                    <AiOutlineEye onClick={() => {
+                      assignWatcher(userId, cardId, boardId).then(() => {
+                        initiateUpdateCard()
+                        // console.log(card.watchersId)
+                      })
+                    }} />
+                  </IconContext.Provider>
+                ) : (
+                  <IconContext.Provider
+                    value={{color: 'red', size: '30px'}}
+                  >
+                    <AiFillEye onClick={() => {
+                      removeWatcher(userId, cardId, boardId).then(() => {
+                        initiateUpdateCard()
+                      })
+                    }}/>
+                  </IconContext.Provider>
+                )}
+              </div>
+            </div>
+            <div>
+              <button className="btn btn-danger">Delete</button>
             </div>
           </div>
           
@@ -254,6 +260,9 @@ export const CardModalComponent = ({
             </div>
           ) : <></>}
 
+          <div className="my-2">
+               <MapCard card={card} boardId={boardId}/>
+          </div>
         </div>
       ) : <LoadingComponent/>}
     </>
