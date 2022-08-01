@@ -449,6 +449,17 @@ export const deleteLabel = async (labelId, boardId) => {
     
 }
 
+export const updateLabel = async (labelId, boardId, text, color) => {
+    if (!labelId || !text || !color) {
+        return
+    }
+
+    await updateDoc(doc(db.getDB(), `boards/${boardId}/labels`, labelId), {
+        name: text,
+        color: color
+    })
+}
+
 export const addDueDate = async (cardId, boardId, date) => {
     if (!cardId || !boardId || !date) {
         return
