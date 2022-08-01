@@ -252,8 +252,7 @@ export const KanbanPage = ({ userId }) => {
                 card={card}
                 boardId={boardId}
                 setModalTitle={setModalTitle}
-                cardUpdater={cardUpdater}
-                setCardUpdater={setCardUpdater}
+                initiateUpdateCard={initiateUpdateCard}
               />
             ) : modalTitle === "Label Management" ? (
               <div>

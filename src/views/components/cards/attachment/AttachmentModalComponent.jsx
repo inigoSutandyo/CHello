@@ -1,14 +1,15 @@
 import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { DropComponent } from "./DropComponent";
+import { LinkAttachment } from "./LinkAttachment";
 
 export const AttachmentModalComponent = ({
   card,
   boardId,
   setModalTitle,
-  cardUpdater,
-  setCardUpdater,
+  initiateUpdateCard
 }) => {
+
   return (
     <div>
       <div
@@ -20,11 +21,11 @@ export const AttachmentModalComponent = ({
         <FaArrowLeft />
       </div>
       <DropComponent
-        cardId={card.uid}
+        card={card}
         boardId={boardId}
-        cardUpdater={cardUpdater}
-        setCardUpdater={setCardUpdater}
+        initiateUpdateCard={initiateUpdateCard}
       />
+      <LinkAttachment card={card} boardId={boardId} initiateUpdateCard={initiateUpdateCard}/>
     </div>
   );
 };

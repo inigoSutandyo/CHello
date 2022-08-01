@@ -487,16 +487,16 @@ export const mentionUser = async (data, userId) => {
 
 }
 
-export const useFiles = (cardId, boardId, updater) => {
+export const useFiles = (card, boardId, updater) => {
     const [files, setFiles] = useState()
 
     useEffect(() => {
-      if (!cardId || !boardId) {
+      if (!card || !boardId) {
         return
       }
       const loadData = async () => {
           const fileList = []
-          const cardRef = doc(db.getDB(), `boards/${boardId}/cards`,cardId)
+          const cardRef = doc(db.getDB(), `boards/${boardId}/cards`,card.uid)
           const cardSnap = await getDoc(cardRef)
           if (cardSnap.exists() && cardSnap.data().files) {
 
@@ -509,10 +509,11 @@ export const useFiles = (cardId, boardId, updater) => {
             });
           }
           setFiles(fileList)
+          console.log(fileList)
       }
       loadData()
-    }, [updater])
-    // console.log(files)
+    }, [card, updater])
+    
     return files   
 }
 
@@ -636,4 +637,18 @@ export const deleteCard = async (cardId, boardId) => {
         })
     }
     await deleteDoc(cardRef)
+}
+
+export const addLink = async (url, cardId, boardId) => {
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+    await updateDoc(cardRef, {
+        links: arrayUnion(url)
+    })
+}
+
+export const detachLink = async (url, cardId, boardId) => {
+    const cardRef = doc(db.getDB(), `boards/${boardId}/cards`, cardId)
+    await updateDoc(cardRef, {
+        links: arrayRemove(url)
+    })
 }

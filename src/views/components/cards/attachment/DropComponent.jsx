@@ -2,24 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { FaFileAlt, FaFileDownload, FaWindowClose } from "react-icons/fa";
 import { IconContext } from "react-icons/lib";
-import { Link } from "react-router-dom";
 import { addFiles, detachFile, donwloadFile, useFiles } from "../../../../controller/CardController";
 import { LoadingComponent } from "../../LoadingComponent";
 
-export const DropComponent = ({cardId, boardId, setCardUpdater, cardUpdater}) => {
+export const DropComponent = ({card, boardId, initiateUpdateCard}) => {
   
   const [loading, setLoading] = useState(false)
   const [updater, setUpdater] = useState(0)
-
-//   useEffect(() => {
-//     const timer = setInterval(() => setUpdater(updater+1),10000);
-
-//     return () => {
-//       clearInterval(timer);
-//     };
-//   }, [])
-
-
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     maxSize: 5000000,
     maxFiles: 3,
@@ -31,11 +20,10 @@ export const DropComponent = ({cardId, boardId, setCardUpdater, cardUpdater}) =>
 
         if (acceptedFiles.length > 0) {
             setLoading(true)
-            addFiles(cardId, boardId, acceptedFiles).then(() => {
+            addFiles(card.uid, boardId, acceptedFiles).then(() => {
                 console.log("upload finished")
                 setLoading(false)
-                setCardUpdater(cardUpdater+1)
-                setUpdater(updater+1)
+                initiateUpdateCard()
             })
         }
     }
@@ -43,10 +31,10 @@ export const DropComponent = ({cardId, boardId, setCardUpdater, cardUpdater}) =>
 
   useEffect(() => {
     setUpdater(updater+1)
-  }, [cardId, cardUpdater])
+  }, [card])
   
-  const files = useFiles(cardId, boardId, updater)
-
+  const files = useFiles(card, boardId, updater)
+//   console.log(files)
   return (
     <>
         {!loading ? (
@@ -89,9 +77,8 @@ export const DropComponent = ({cardId, boardId, setCardUpdater, cardUpdater}) =>
                                     <FaWindowClose style={{
                                         cursor: "pointer"
                                     }} onClick={() => {
-                                        detachFile(file.path, cardId, boardId).then(() => {
-                                            setCardUpdater(cardUpdater+1) 
-                                            setUpdater(updater+1)
+                                        detachFile(file.path, card.uid, boardId).then(() => {
+                                            initiateUpdateCard()
                                         })
                                     }}/>
                                 </IconContext.Provider>
