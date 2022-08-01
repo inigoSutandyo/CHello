@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { createNewWorkspace, createWorkspace } from "../factory/WorkspaceFactory";
 import Workspace from "../model/Workspace";
 import { db } from "../util/FireBaseConfig";
+import { closeBoard } from "./BoardController";
 import { createNotifications, notifyUser } from "./InviteController";
 
 export const useWorkspace = (userId, updater, search) => {
@@ -239,7 +240,17 @@ export const addNewWorkspace = async (e) => {
 };
 
 export const deleteWorkspace = async (workspaceId) => {
-  console.log("deleting")
+  const docSnap = await getDoc(doc(db.getDB(), 'workspaces', workspaceId))
+  if (docSnap.exists()) {
+    const data = docSnap.data()
+    const boardRefs = data.boards
+    if (boardRefs && boardRefs.length > 0) {
+      for (let i = 0; i < boardRefs.length; i++) {
+        const element = boardRefs[i];
+        closeBoard(element.id, workspaceId)
+      }
+    }
+  }
   await deleteDoc(doc(db.getDB(), 'workspaces', workspaceId))
 }
 
