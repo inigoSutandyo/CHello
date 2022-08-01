@@ -27,7 +27,6 @@ function App() {
   // useEffect(() => {
   //   setIsAuth(checkAuth())
   // }, [checkAuth()])
-
   return (
     <BrowserRouter>
       <nav className="navbar navbar-expand-lg bg-light">

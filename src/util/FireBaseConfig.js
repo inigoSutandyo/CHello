@@ -9,7 +9,7 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB6Awo2iM_RdzewGpF6mZkPmaaQRev1f6c",
+  apiKey: `${process.env.REACT_APP_FIREBASE_API_KEY}`,
   authDomain: "chello-tpa.firebaseapp.com",
   projectId: "chello-tpa",
   storageBucket: "chello-tpa.appspot.com",
